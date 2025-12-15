@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What is Deep Learning?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .slide {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 60px;
+            max-width: 1200px;
+            width: 100%;
+            animation: slideIn 0.8s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 3.5em;
+            margin-bottom: 30px;
+            text-align: center;
+            border-bottom: 4px solid #667eea;
+            padding-bottom: 20px;
+        }
+
+        .definition {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+            border-left: 6px solid #667eea;
+            font-size: 1.3em;
+            line-height: 1.8;
+        }
+
+        h2 {
+            color: #764ba2;
+            font-size: 2em;
+            margin: 40px 0 20px 0;
+        }
+
+        .layers-diagram {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 40px 0;
+            padding: 30px;
+            background: #f9f9f9;
+            border-radius: 15px;
+        }
+
+        .layer {
+            text-align: center;
+            padding: 20px;
+            flex: 1;
+        }
+
+        .layer-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .arrow {
+            font-size: 3em;
+            color: #667eea;
+            padding: 0 10px;
+        }
+
+        .key-points {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .point-card {
+            background: #f9f9f9;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .point-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.2);
+        }
+
+        .point-card h3 {
+            color: #667eea;
+            font-size: 1.4em;
+            margin-bottom: 10px;
+        }
+
+        .point-card p {
+            color: #555;
+            line-height: 1.6;
+            font-size: 1.1em;
+        }
+
+        .examples {
+            background: #fff3cd;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 30px 0;
+            border-left: 4px solid #ffc107;
+        }
+
+        .examples h3 {
+            color: #856404;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .examples ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .examples li {
+            padding: 8px 0;
+            padding-left: 30px;
+            position: relative;
+            font-size: 1.2em;
+        }
+
+        .examples li:before {
+            content: "✓";
+            color: #28a745;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+            font-size: 1.3em;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .comparison-box {
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+        }
+
+        .comparison-box.traditional {
+            background: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .comparison-box.deep {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+        }
+
+        .comparison-box h3 {
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        .comparison-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .comparison-box li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+            font-size: 1.1em;
+        }
+
+        .comparison-box li:before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide">
+        <h1>What is Deep Learning?</h1>
+        
+        <div class="definition">
+            <strong>Deep Learning</strong> is a subset of machine learning that uses artificial neural networks with multiple layers (hence "deep") to progressively extract higher-level features from raw input data.
+        </div>
+
+        <h2>How It Works: Neural Network Layers</h2>
+        <div class="layers-diagram">
+            <div class="layer">
+                <div class="layer-box">Input Layer</div>
+                <p>Raw Data</p>
+            </div>
+            <div class="arrow">→</div>
+            <div class="layer">
+                <div class="layer-box">Hidden Layers</div>
+                <p>Feature Learning</p>
+            </div>
+            <div class="arrow">→</div>
+            <div class="layer">
+                <div class="layer-box">Output Layer</div>
+                <p>Prediction</p>
+            </div>
+        </div>
+
+        <h2>Key Characteristics</h2>
+        <div class="key-points">
+            <div class="point-card">
+                <h3>🧠 Multiple Layers</h3>
+                <p>Uses many interconnected layers of artificial neurons, each learning different levels of abstraction from the data.</p>
+            </div>
+            <div class="point-card">
+                <h3>🎯 Automatic Feature Learning</h3>
+                <p>Automatically discovers the representations needed for detection or classification from raw data, without manual feature engineering.</p>
+            </div>
+            <div class="point-card">
+                <h3>📊 Big Data Processing</h3>
+                <p>Excels with large amounts of data, improving accuracy as more training data becomes available.</p>
+            </div>
+            <div class="point-card">
+                <h3>⚡ Computational Power</h3>
+                <p>Requires significant computing resources, typically utilizing GPUs for training complex models.</p>
+            </div>
+        </div>
+
+        <h2>Traditional ML vs Deep Learning</h2>
+        <div class="comparison">
+            <div class="comparison-box traditional">
+                <h3>Traditional Machine Learning</h3>
+                <ul>
+                    <li>Manual feature extraction</li>
+                    <li>Simpler models</li>
+                    <li>Works well with smaller datasets</li>
+                    <li>Easier to interpret</li>
+                </ul>
+            </div>
+            <div class="comparison-box deep">
+                <h3>Deep Learning</h3>
+                <ul>
+                    <li>Automatic feature learning</li>
+                    <li>Complex neural networks</li>
+                    <li>Needs large datasets</li>
+                    <li>Higher accuracy on complex tasks</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="examples">
+            <h3>Real-World Applications</h3>
+            <ul>
+                <li>Image Recognition (facial recognition, medical imaging)</li>
+                <li>Natural Language Processing (ChatGPT, translation)</li>
+                <li>Speech Recognition (Siri, Alexa)</li>
+                <li>Autonomous Vehicles (self-driving cars)</li>
+                <li>Recommendation Systems (Netflix, YouTube)</li>
+                <li>Game Playing (AlphaGo, chess engines)</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            Created by OpenAI and Claude.ai
+        </div>
+    </div>
+</body>
+</html>
