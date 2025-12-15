@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introduction to PyTorch</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+
+        .slides-container {
+            width: 90%;
+            max-width: 1000px;
+            height: 600px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            padding: 60px;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .slide.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #667eea;
+            font-size: 2.2em;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #764ba2;
+            font-size: 1.5em;
+            margin-top: 20px;
+            margin-bottom: 15px;
+        }
+
+        p, li {
+            font-size: 1.1em;
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 15px;
+        }
+
+        ul {
+            margin-left: 30px;
+        }
+
+        .logo {
+            text-align: center;
+            font-size: 1.5em;
+            color: #888;
+            margin-top: 30px;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1em;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(118, 75, 162, 0.4);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .slide-counter {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .code-block {
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            overflow-x: auto;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .architecture-box {
+            background: #f8f9fa;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .neural-viz {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .neuron {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .layer {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .layer-label {
+            font-size: 0.9em;
+            color: #764ba2;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="slides-container">
+        <div class="slide-counter">
+            <span id="currentSlide">1</span> / <span id="totalSlides">8</span>
+        </div>
+
+        <!-- Slide 1: Title -->
+        <div class="slide active">
+            <h1>Introduction to PyTorch</h1>
+            <p style="text-align: center; font-size: 1.3em; color: #667eea;">
+                A Deep Learning Framework for Neural Networks
+            </p>
+            <div class="logo">🔥 PyTorch</div>
+        </div>
+
+        <!-- Slide 2: What is PyTorch -->
+        <div class="slide">
+            <h2>What is PyTorch?</h2>
+            <p>PyTorch is an open-source machine learning library developed by Facebook's AI Research lab (FAIR).</p>
+            <ul>
+                <li><strong>Flexible:</strong> Dynamic computational graphs for intuitive model building</li>
+                <li><strong>Pythonic:</strong> Natural Python syntax and debugging</li>
+                <li><strong>Powerful:</strong> GPU acceleration for fast training</li>
+                <li><strong>Research-friendly:</strong> Easy prototyping and experimentation</li>
+                <li><strong>Production-ready:</strong> Deploy models with TorchScript</li>
+            </ul>
+        </div>
+
+        <!-- Slide 3: Architecture -->
+        <div class="slide">
+            <h2>PyTorch Architecture</h2>
+            <div class="architecture-box">
+                <h3>Core Components:</h3>
+                <p><span class="highlight">Tensor</span> - Multi-dimensional arrays (like NumPy, but with GPU support)</p>
+                <p><span class="highlight">Autograd</span> - Automatic differentiation for gradient computation</p>
+                <p><span class="highlight">nn.Module</span> - Base class for all neural network layers</p>
+                <p><span class="highlight">Optimizers</span> - Algorithms for parameter updates (SGD, Adam, etc.)</p>
+            </div>
+            <p style="margin-top: 20px;">PyTorch uses <strong>dynamic computation graphs</strong> built on-the-fly during forward pass, enabling flexible architectures.</p>
+        </div>
+
+        <!-- Slide 4: Why PyTorch for Neural Networks -->
+        <div class="slide">
+            <h2>Why PyTorch for Neural Networks?</h2>
+            <ul>
+                <li><strong>Automatic Differentiation:</strong> Computes gradients automatically via backpropagation</li>
+                <li><strong>GPU Acceleration:</strong> Seamlessly move tensors to GPU with <code>.to('cuda')</code></li>
+                <li><strong>Modular Design:</strong> Build networks layer-by-layer with torch.nn</li>
+                <li><strong>Rich Ecosystem:</strong> Pre-trained models, datasets, and utilities</li>
+                <li><strong>Dynamic Graphs:</strong> Change network architecture during runtime</li>
+            </ul>
+            <p style="margin-top: 20px; font-style: italic;">Perfect for both research and production!</p>
+        </div>
+
+        <!-- Slide 5: Simple Perceptron -->
+        <div class="slide">
+            <h2>Example 1: Simple Perceptron</h2>
+            <div class="neural-viz">
+                <div class="layer">
+                    <div class="layer-label">Input (2)</div>
+                    <div class="neuron">x₁</div>
+                    <div class="neuron">x₂</div>
+                </div>
+                <div style="font-size: 2em; color: #667eea;">→</div>
+                <div class="layer">
+                    <div class="layer-label">Output (1)</div>
+                    <div class="neuron">y</div>
+                </div>
+            </div>
+            <div class="code-block">
+import torch<br>
+import torch.nn as nn<br><br>
+class Perceptron(nn.Module):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;def __init__(self):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;super().__init__()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;self.linear = nn.Linear(2, 1)  # 2 inputs → 1 output<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;def forward(self, x):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return torch.sigmoid(self.linear(x))
+            </div>
+        </div>
+
+        <!-- Slide 6: Perceptron Training -->
+        <div class="slide">
+            <h2>Training the Perceptron</h2>
+            <div class="code-block">
+# Create model, loss, and optimizer<br>
+model = Perceptron()<br>
+criterion = nn.BCELoss()  # Binary Cross Entropy<br>
+optimizer = torch.optim.SGD(model.parameters(), lr=0.1)<br><br>
+# Training data (XOR problem)<br>
+X = torch.tensor([[0.,0.], [0.,1.], [1.,0.], [1.,1.]])<br>
+y = torch.tensor([[0.], [1.], [1.], [0.]])<br><br>
+# Training loop<br>
+for epoch in range(1000):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;optimizer.zero_grad()  # Clear gradients<br>
+&nbsp;&nbsp;&nbsp;&nbsp;output = model(X)      # Forward pass<br>
+&nbsp;&nbsp;&nbsp;&nbsp;loss = criterion(output, y)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;loss.backward()        # Compute gradients<br>
+&nbsp;&nbsp;&nbsp;&nbsp;optimizer.step()       # Update weights
+            </div>
+        </div>
+
+        <!-- Slide 7: Running in Google Colab -->
+        <div class="slide">
+            <h2>Running in Google Colab</h2>
+            <p>Google Colab provides free GPU access for PyTorch! Here's how to get started:</p>
+            <h3>Step 1: Access Colab</h3>
+            <p>Visit <strong>colab.research.google.com</strong> and create a new notebook</p>
+            <h3>Step 2: Enable GPU (Optional but Recommended)</h3>
+            <p>Runtime → Change runtime type → Hardware accelerator → GPU</p>
+            <h3>Step 3: Check PyTorch Installation</h3>
+            <div class="code-block">
+import torch<br>
+print(f"PyTorch version: {torch.__version__}")<br>
+print(f"CUDA available: {torch.cuda.is_available()}")<br>
+print(f"Device: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CPU'}")
+            </div>
+            <p style="margin-top: 15px;">PyTorch comes pre-installed in Colab! Just import and start coding. 🎉</p>
+        </div>
+
+        <!-- Slide 8: What is GPU? -->
+        <div class="slide">
+            <h2>What is a GPU?</h2>
+            <p><strong>GPU (Graphics Processing Unit)</strong> is a specialized processor designed for parallel computations.</p>
+            <h3>CPU vs GPU for Neural Networks:</h3>
+            <div class="architecture-box">
+                <p><span class="highlight">CPU</span> - Few cores (4-16), processes tasks sequentially, good for general computing</p>
+                <p><span class="highlight">GPU</span> - Thousands of cores, processes many tasks simultaneously, excellent for matrix operations</p>
+            </div>
+            <p style="margin-top: 20px;"><strong>Why GPUs for Deep Learning?</strong></p>
+            <ul>
+                <li>Neural networks involve massive matrix multiplications</li>
+                <li>GPUs can compute thousands of operations in parallel</li>
+                <li>Training time: Hours on CPU → Minutes on GPU</li>
+                <li>Example: Training a simple network can be 10-100x faster on GPU</li>
+            </ul>
+        </div>
+
+        <!-- Slide 9: Complete Colab Perceptron Example -->
+        <div class="slide">
+            <h2>Complete Perceptron in Colab</h2>
+            <p style="font-size: 0.95em;">Copy this entire code into a Colab cell and run it:</p>
+            <div class="code-block" style="font-size: 0.85em;">
+import torch<br>
+import torch.nn as nn<br>
+import torch.optim as optim<br><br>
+# Check device<br>
+device = 'cuda' if torch.cuda.is_available() else 'cpu'<br>
+print(f'Using device: {device}')<br><br>
+# Define Perceptron<br>
+class Perceptron(nn.Module):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;def __init__(self):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;super().__init__()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;self.linear = nn.Linear(2, 1)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;def forward(self, x):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return torch.sigmoid(self.linear(x))<br><br>
+# Data (OR gate)<br>
+X = torch.tensor([[0.,0.], [0.,1.], [1.,0.], [1.,1.]]).to(device)<br>
+y = torch.tensor([[0.], [1.], [1.], [1.]]).to(device)<br><br>
+# Model, loss, optimizer<br>
+model = Perceptron().to(device)<br>
+criterion = nn.BCELoss()<br>
+optimizer = optim.SGD(model.parameters(), lr=0.5)<br><br>
+# Train<br>
+for epoch in range(500):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;output = model(X)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;loss = criterion(output, y)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;optimizer.zero_grad()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;loss.backward()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;optimizer.step()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if (epoch+1) % 100 == 0:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print(f'Epoch {epoch+1}, Loss: {loss.item():.4f}')<br><br>
+# Test<br>
+with torch.no_grad():<br>
+&nbsp;&nbsp;&nbsp;&nbsp;predictions = model(X)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;print('\nPredictions:')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;for i, pred in enumerate(predictions):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print(f'{X[i].cpu().numpy()} → {pred.item():.4f}')
+            </div>
+        </div>
+
+        <!-- Slide 10: Network with Hidden Layer -->
+        <div class="slide">
+            <h2>Example 2: Network with Hidden Layer</h2>
+            <div class="neural-viz">
+                <div class="layer">
+                    <div class="layer-label">Input (2)</div>
+                    <div class="neuron">x₁</div>
+                    <div class="neuron">x₂</div>
+                </div>
+                <div style="font-size: 2em; color: #667eea;">→</div>
+                <div class="layer">
+                    <div class="layer-label">Hidden (4)</div>
+                    <div class="neuron">h₁</div>
+                    <div class="neuron">h₂</div>
+                    <div class="neuron">h₃</div>
+                    <div class="neuron">h₄</div>
+                </div>
+                <div style="font-size: 2em; color: #667eea;">→</div>
+                <div class="layer">
+                    <div class="layer-label">Output (1)</div>
+                    <div class="neuron">y</div>
+                </div>
+            </div>
+            <div class="code-block">
+class NeuralNetwork(nn.Module):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;def __init__(self):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;super().__init__()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;self.hidden = nn.Linear(2, 4)  # Input → Hidden<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;self.output = nn.Linear(4, 1)  # Hidden → Output<br><br>
+&nbsp;&nbsp;&nbsp;&nbsp;def forward(self, x):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x = torch.relu(self.hidden(x))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x = torch.sigmoid(self.output(x))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return x
+            </div>
+        </div>
+
+        <!-- Slide 11: Summary -->
+        <div class="slide">
+            <h2>Key Takeaways</h2>
+            <ul>
+                <li>PyTorch provides <strong>tensors</strong> with GPU support and <strong>autograd</strong> for automatic differentiation</li>
+                <li>Build networks using <strong>nn.Module</strong> by defining layers and forward pass</li>
+                <li>Training loop: forward pass → compute loss → backward pass → update weights</li>
+                <li>Hidden layers with activation functions enable learning complex patterns</li>
+                <li>PyTorch's dynamic graphs make debugging and experimentation intuitive</li>
+            </ul>
+            <p style="text-align: center; margin-top: 30px; font-size: 1.3em; color: #667eea;">
+                Ready to build your own neural networks! 🚀
+            </p>
+        </div>
+
+        <div class="controls">
+            <button id="prevBtn" onclick="changeSlide(-1)">Previous</button>
+            <button id="nextBtn" onclick="changeSlide(1)">Next</button>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        
+        document.getElementById('totalSlides').textContent = totalSlides;
+
+        function showSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (n + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            
+            document.getElementById('currentSlide').textContent = currentSlide + 1;
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+        }
+
+        function changeSlide(direction) {
+            showSlide(currentSlide + direction);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' && currentSlide > 0) changeSlide(-1);
+            if (e.key === 'ArrowRight' && currentSlide < totalSlides - 1) changeSlide(1);
+        });
+
+        // Initialize
+        showSlide(0);
+    </script>
+</body>
+</html>
