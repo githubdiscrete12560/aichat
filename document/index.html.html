@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyTorch Full-Stack AI App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .slide-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .slide {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 60px;
+            max-width: 1200px;
+            width: 100%;
+            max-height: 85vh;
+            min-height: 600px;
+            display: none;
+            animation: slideIn 0.5s ease-out;
+            overflow-y: auto;
+        }
+        
+        .slide::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .slide::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .slide::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+        
+        .slide::-webkit-scrollbar-thumb:hover {
+            background: #764ba2;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 3em;
+            margin-bottom: 30px;
+            border-bottom: 4px solid #667eea;
+            padding-bottom: 15px;
+        }
+
+        h2 {
+            color: #764ba2;
+            font-size: 2em;
+            margin: 30px 0 20px 0;
+        }
+
+        h3 {
+            color: #555;
+            font-size: 1.5em;
+            margin: 20px 0 15px 0;
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        ul li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            font-size: 1.2em;
+            line-height: 1.6;
+        }
+
+        ul li:before {
+            content: "▸";
+            color: #667eea;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        ul ul {
+            margin-left: 30px;
+        }
+
+        ul ul li {
+            font-size: 1.1em;
+            color: #666;
+        }
+
+        .code-block {
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .diagram {
+            text-align: center;
+            font-size: 1.5em;
+            line-height: 2;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 10px;
+        }
+
+        .arrow {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            background: rgba(255,255,255,0.95);
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slide-number {
+            color: #666;
+            font-weight: bold;
+            padding: 0 15px;
+            line-height: 48px;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 8px;
+            border-radius: 3px;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 20px 0;
+        }
+
+        .comparison-box {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #667eea;
+        }
+
+        .note {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-container">
+        <!-- Slide 1 -->
+        <div class="slide active">
+            <h1>Introduction to PyTorch</h1>
+            <h2>What Is PyTorch?</h2>
+            <ul>
+                <li>PyTorch is a deep learning framework</li>
+                <li>Designed for:
+                    <ul>
+                        <li>Neural networks</li>
+                        <li>Automatic differentiation</li>
+                        <li>GPU acceleration</li>
+                    </ul>
+                </li>
+                <li>Widely used in:
+                    <ul>
+                        <li>Research</li>
+                        <li>Education</li>
+                        <li>Production systems</li>
+                    </ul>
+                </li>
+            </ul>
+            <div class="note">
+                <strong>Teaching Note:</strong> PyTorch focuses on how models learn, not how users interact with them.
+            </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="slide">
+            <h1>PyTorch vs TensorFlow</h1>
+            <div class="comparison">
+                <div class="comparison-box">
+                    <h3>PyTorch</h3>
+                    <ul>
+                        <li>Python-first</li>
+                        <li>Dynamic computation graph</li>
+                        <li>Easier to debug</li>
+                        <li>Preferred for teaching & research</li>
+                    </ul>
+                </div>
+                <div class="comparison-box">
+                    <h3>TensorFlow</h3>
+                    <ul>
+                        <li>More static</li>
+                        <li>Strong production tooling</li>
+                        <li>Often used in large-scale deployment</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="note">
+                <strong>Key Takeaway:</strong> PyTorch is ideal for learning and prototyping AI systems.
+            </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="slide">
+            <h1>What Is a Full-Stack AI App?</h1>
+            <h2>Components:</h2>
+            <ul>
+                <li><strong>Frontend:</strong> User interface (Flutter)</li>
+                <li><strong>Backend:</strong> API + AI logic (FastAPI + PyTorch)</li>
+                <li><strong>Model:</strong> Neural network (Perceptron)</li>
+                <li><strong>Storage:</strong> Files + Database (SQLite)</li>
+            </ul>
+            <div class="note">
+                <strong>Key Idea:</strong> Users never interact with PyTorch directly — they interact through an API.
+            </div>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="slide">
+            <h1>Overall Architecture</h1>
+            <div class="diagram">
+                <div>Flutter UI</div>
+                <div class="arrow">↓ HTTP (REST API)</div>
+                <div>FastAPI Backend</div>
+                <div class="arrow">↓</div>
+                <div>PyTorch Model</div>
+                <div class="arrow">↓</div>
+                <div>SQLite Database</div>
+            </div>
+            <h2>Responsibilities:</h2>
+            <ul>
+                <li><strong>Flutter</strong> → Input & display</li>
+                <li><strong>FastAPI</strong> → Control flow</li>
+                <li><strong>PyTorch</strong> → Computation</li>
+                <li><strong>Database</strong> → Persistence</li>
+            </ul>
+        </div>
+
+        <!-- Slide 5 -->
+        <div class="slide">
+            <h1>Where Does REST API Fit?</h1>
+            <h2>REST API acts as the bridge</h2>
+            <ul>
+                <li>Frontend ↔ Backend communication</li>
+                <li>JSON in / JSON out</li>
+                <li>Stateless requests</li>
+            </ul>
+            <h3>Example:</h3>
+            <div class="code-block">POST /perceptron
+{
+  "x1": 1,
+  "x2": 2
+}</div>
+        </div>
+
+        <!-- Slide 6 -->
+        <div class="slide">
+            <h1>The AI Model: A Perceptron</h1>
+            <h2>Model definition:</h2>
+            <ul>
+                <li>2 inputs</li>
+                <li>1 output</li>
+                <li>Sigmoid activation</li>
+            </ul>
+            <h3>Math:</h3>
+            <div class="diagram">
+                y = σ(w₁x₁ + w₂x₂ + b)
+            </div>
+            <h3>Why perceptron?</h3>
+            <ul>
+                <li>Small</li>
+                <li>Explainable</li>
+                <li>Perfect for teaching fundamentals</li>
+            </ul>
+        </div>
+
+        <!-- Slide 7 -->
+        <div class="slide">
+            <h1>File Structure Overview</h1>
+            <div class="code-block">project/
+├── backend/
+│   ├── main.py
+│   ├── database.py
+│   ├── perceptron.db
+│   └── venv/
+│
+├── frontend/
+│   └── lib/main.dart</div>
+            <div class="note">
+                <strong>Design Principle:</strong> Separate UI, logic, and storage.
+            </div>
+        </div>
+
+        <!-- Slide 8 -->
+        <div class="slide">
+            <h1>main.py: Backend Entry Point</h1>
+            <h2>Responsibilities:</h2>
+            <ul>
+                <li>Start FastAPI server</li>
+                <li>Load PyTorch model</li>
+                <li>Define API endpoints</li>
+                <li>Handle requests</li>
+            </ul>
+            <h3>Key libraries:</h3>
+            <ul>
+                <li>fastapi</li>
+                <li>torch</li>
+                <li>pydantic</li>
+                <li>uvicorn</li>
+            </ul>
+        </div>
+
+        <!-- Slide 9 -->
+        <div class="slide">
+            <h1>main.py: Model Code Explained</h1>
+            <div class="code-block">class Perceptron(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.linear = nn.Linear(2, 1)
+    
+    def forward(self, x):
+        return torch.sigmoid(self.linear(x))</div>
+            <h3>Explanation:</h3>
+            <ul>
+                <li><strong>nn.Linear(2,1)</strong> → 2-D input</li>
+                <li><strong>forward()</strong> → computation logic</li>
+                <li><strong>sigmoid()</strong> → output between 0 and 1</li>
+            </ul>
+        </div>
+
+        <!-- Slide 10 -->
+        <div class="slide">
+            <h1>main.py: API Endpoint Logic</h1>
+            <div class="code-block">@app.post("/perceptron")
+def run_perceptron(data: InputData):
+    x = torch.tensor([[data.x1, data.x2]])
+    output = model(x)</div>
+            <h3>What happens:</h3>
+            <ul>
+                <li>1. Receive JSON</li>
+                <li>2. Convert to tensor</li>
+                <li>3. Run model</li>
+                <li>4. Return result</li>
+            </ul>
+        </div>
+
+        <!-- Slide 11 -->
+        <div class="slide">
+            <h1>database.py: Why Do We Need a Database?</h1>
+            <h2>Purpose of SQLite:</h2>
+            <ul>
+                <li>Save inputs</li>
+                <li>Save outputs</li>
+                <li>Enable reproducibility</li>
+                <li>Enable logging & analysis</li>
+            </ul>
+            <h3>Why SQLite?</h3>
+            <ul>
+                <li>No server required</li>
+                <li>One file</li>
+                <li>Perfect for teaching</li>
+            </ul>
+        </div>
+
+        <!-- Slide 12 -->
+        <div class="slide">
+            <h1>database.py: Core Concepts</h1>
+            <h2>Key ideas:</h2>
+            <ul>
+                <li><strong>Engine</strong> → database connection</li>
+                <li><strong>Session</strong> → transaction handler</li>
+                <li><strong>Table</strong> → structured storage</li>
+            </ul>
+            <h3>Libraries used:</h3>
+            <ul>
+                <li>sqlalchemy</li>
+                <li>sqlite3 (indirectly)</li>
+            </ul>
+        </div>
+
+        <!-- Slide 13 -->
+        <div class="slide">
+            <h1>database.py: Table Definition</h1>
+            <div class="code-block">class Result(Base):
+    __tablename__ = "results"
+    
+    id = Column(Integer, primary_key=True)
+    x1 = Column(Float)
+    x2 = Column(Float)
+    output = Column(Float)</div>
+            <div class="note">
+                <strong>Teaching Insight:</strong> Databases store results, not models.
+            </div>
+        </div>
+
+        <!-- Slide 14 -->
+        <div class="slide">
+            <h1>Where Is Data Stored?</h1>
+            <table>
+                <tr>
+                    <th>Data Type</th>
+                    <th>Storage Location</th>
+                </tr>
+                <tr>
+                    <td>Model structure</td>
+                    <td>main.py</td>
+                </tr>
+                <tr>
+                    <td>Model weights</td>
+                    <td>Memory / .pt file</td>
+                </tr>
+                <tr>
+                    <td>Inputs & outputs</td>
+                    <td>SQLite database</td>
+                </tr>
+                <tr>
+                    <td>UI state</td>
+                    <td>Flutter memory</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Slide 15 -->
+        <div class="slide">
+            <h1>main.dart: Frontend Responsibilities</h1>
+            <h2>What Flutter does:</h2>
+            <ul>
+                <li>Collect user input</li>
+                <li>Send HTTP request</li>
+                <li>Display response</li>
+            </ul>
+            <h2>Flutter does NOT:</h2>
+            <ul>
+                <li>Run AI</li>
+                <li>Store model</li>
+                <li>Train networks</li>
+            </ul>
+        </div>
+
+        <!-- Slide 16 -->
+        <div class="slide">
+            <h1>main.dart: Input Handling</h1>
+            <div class="code-block">TextField(controller: x1Controller)
+TextField(controller: x2Controller)</div>
+            <div class="note">
+                <strong>Key Idea:</strong>
+                <ul>
+                    <li>Each input field = one input dimension</li>
+                    <li>UI must match model dimension</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 17 -->
+        <div class="slide">
+            <h1>main.dart: API Call Logic</h1>
+            <div class="code-block">final response = await http.post(
+  Uri.parse("http://127.0.0.1:8000/perceptron"),
+  body: jsonEncode({...}),
+);</div>
+            <h3>Flow:</h3>
+            <ul>
+                <li>1. Button clicked</li>
+                <li>2. HTTP request sent</li>
+                <li>3. JSON parsed</li>
+                <li>4. UI updated</li>
+            </ul>
+        </div>
+
+        <!-- Slide 18 -->
+        <div class="slide">
+            <h1>Displaying Results Safely</h1>
+            <div class="code-block">if (result != null) ...[
+  Text("Output: ${result!['output']}")
+]</div>
+            <h3>Why ... ?</h3>
+            <ul>
+                <li>Spread operator</li>
+                <li>Inserts multiple widgets conditionally</li>
+            </ul>
+        </div>
+
+        <!-- Slide 19 -->
+        <div class="slide">
+            <h1>Common Backend Errors</h1>
+            <table>
+                <tr>
+                    <th>Error</th>
+                    <th>Cause</th>
+                    <th>Fix</th>
+                </tr>
+                <tr>
+                    <td>Import fastapi not resolved</td>
+                    <td>venv not active</td>
+                    <td>Activate venv</td>
+                </tr>
+                <tr>
+                    <td>No module named numpy</td>
+                    <td>Missing dependency</td>
+                    <td>pip install numpy</td>
+                </tr>
+                <tr>
+                    <td>Connection refused</td>
+                    <td>Server not running</td>
+                    <td>Start uvicorn</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Slide 20 -->
+        <div class="slide">
+            <h1>Common Frontend Errors</h1>
+            <table>
+                <tr>
+                    <th>Error</th>
+                    <th>Cause</th>
+                    <th>Fix</th>
+                </tr>
+                <tr>
+                    <td>Failed to fetch</td>
+                    <td>Backend not running</td>
+                    <td>Start backend</td>
+                </tr>
+                <tr>
+                    <td>CORS error</td>
+                    <td>Missing middleware</td>
+                    <td>Add CORS</td>
+                </tr>
+                <tr>
+                    <td>Package not found</td>
+                    <td>Wrong dependency</td>
+                    <td>Fix pubspec.yaml</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Slide 21 -->
+        <div class="slide">
+            <h1>Development Order</h1>
+            <h2 style="color: #d32f2f;">Very Important!</h2>
+            <ul>
+                <li>1. Activate virtual environment</li>
+                <li>2. Install backend dependencies</li>
+                <li>3. Run FastAPI server</li>
+                <li>4. Open /docs</li>
+                <li>5. Run Flutter app</li>
+                <li>6. Test full flow</li>
+            </ul>
+        </div>
+
+        <!-- Slide 22 -->
+        <div class="slide">
+            <h1>Educational Takeaways</h1>
+            <ul>
+                <li>AI ≠ UI</li>
+                <li>Models live on the backend</li>
+                <li>REST APIs connect everything</li>
+                <li>Small models are ideal for learning</li>
+                <li>Transparency builds understanding</li>
+            </ul>
+        </div>
+
+        <!-- Slide 23 -->
+        <div class="slide">
+            <h1>Final Summary</h1>
+            <div class="note" style="font-size: 1.3em; padding: 30px;">
+                This project demonstrates how a simple PyTorch perceptron becomes a real AI application through FastAPI, Flutter, and a database.
+            </div>
+            <h2>Next Steps:</h2>
+            <ul>
+                <li>Add diagrams per slide</li>
+                <li>Add student exercises</li>
+                <li>Add assessment questions</li>
+                <li>Extend to multi-layer networks</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button id="prevBtn" onclick="changeSlide(-1)">← Previous</button>
+        <span class="slide-number"><span id="currentSlide">1</span> / <span id="totalSlides">23</span></span>
+        <button id="nextBtn" onclick="changeSlide(1)">Next →</button>
+    </div>
+
+    <div style="position: fixed; bottom: 10px; right: 20px; color: white; font-size: 0.9em; opacity: 0.8; text-align: right;">
+        Created by OpenAI and Claude.ai
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = document.querySelectorAll('.slide').length;
+        
+        document.getElementById('totalSlides').textContent = totalSlides;
+        
+        function showSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            
+            if (n > totalSlides) currentSlide = totalSlides;
+            if (n < 1) currentSlide = 1;
+            
+            slides.forEach(slide => slide.classList.remove('active'));
+            slides[currentSlide - 1].classList.add('active');
+            
+            document.getElementById('currentSlide').textContent = currentSlide;
+            
+            document.getElementById('prevBtn').disabled = currentSlide === 1;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides;
+        }
+        
+        function changeSlide(n) {
+            currentSlide += n;
+            showSlide(currentSlide);
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+            if (e.key === 'ArrowRight') changeSlide(1);
+        });
+        
+        showSlide(currentSlide);
+    </script>
+</body>
+</html>
