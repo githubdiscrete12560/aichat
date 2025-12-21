@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reinforcement Learning: Levels 1-3 Explained (with DQN Code)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #f0f0f0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #4cc9f0;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #4cc9f0, #4361ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(76, 201, 240, 0.2);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #b8c1ec;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .slides-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .slide {
+            background: rgba(25, 25, 35, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-left: 5px solid #4cc9f0;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+
+        .slide-number {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #4361ee;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .slide-title {
+            font-size: 1.8rem;
+            color: #4cc9f0;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(76, 201, 240, 0.3);
+        }
+
+        .slide-content {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #e6e6e6;
+        }
+
+        .slide-content ul, .slide-content ol {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .slide-content li {
+            margin-bottom: 8px;
+        }
+
+        .slide-content code {
+            background: rgba(67, 97, 238, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #b8c1ec;
+        }
+
+        .code-block {
+            background: #0d1525;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            border-left: 4px solid #4361ee;
+        }
+
+        .code-block pre {
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #f8f8f2;
+            white-space: pre;
+        }
+
+        .keyword {
+            color: #ff79c6;
+        }
+
+        .function {
+            color: #50fa7b;
+        }
+
+        .class {
+            color: #8be9fd;
+        }
+
+        .string {
+            color: #f1fa8c;
+        }
+
+        .comment {
+            color: #6272a4;
+        }
+
+        .level-indicator {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 0.9rem;
+        }
+
+        .level-1 {
+            background: rgba(76, 201, 240, 0.2);
+            color: #4cc9f0;
+            border: 1px solid #4cc9f0;
+        }
+
+        .level-2 {
+            background: rgba(67, 97, 238, 0.2);
+            color: #4361ee;
+            border: 1px solid #4361ee;
+        }
+
+        .level-3 {
+            background: rgba(156, 39, 176, 0.2);
+            color: #9c27b0;
+            border: 1px solid #9c27b0;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .comparison-table th, .comparison-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .comparison-table th {
+            background: rgba(67, 97, 238, 0.3);
+            color: #b8c1ec;
+        }
+
+        .comparison-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .analogy {
+            background: rgba(249, 168, 37, 0.1);
+            border-left: 4px solid #f9a825;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .analogy-title {
+            color: #f9a825;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #b8c1ec;
+            font-size: 0.9rem;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding: 20px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-btn {
+            background: #4361ee;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: #3a56d4;
+            transform: translateY(-2px);
+        }
+
+        .nav-btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .slide-indicators {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .slide-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .slide-indicator.active {
+            background: #4cc9f0;
+            transform: scale(1.2);
+        }
+
+        .slide-indicator:hover {
+            background: #4361ee;
+        }
+        /* Add this to your CSS */
+        .scrollable-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .scrollable-body {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        /* Custom scrollbar styling */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(30, 30, 40, 0.8);
+            border-radius: 5px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #4cc9f0, #4361ee);
+            border-radius: 5px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, #4361ee, #9c27b0);
+        }
+        
+       
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .slide {
+                padding: 20px;
+            }
+            
+            .slide-title {
+                font-size: 1.5rem;
+            }
+            
+            .nav-btn {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .comparison-table th, .comparison-table td {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Reinforcement Learning: Levels 1-3 Explained</h1>
+            <p class="subtitle">Understanding how RL evolves from simple tables to neural networks, with complete DQN implementation code</p>
+        </header>
+
+        <main class="slides-container" id="slidesContainer">
+            <!-- Slide 1 -->
+            <div class="slide" id="slide1">
+                <div class="slide-number">1</div>
+                <h2 class="slide-title">Reinforcement Learning: Levels 1-3</h2>
+                <div class="slide-content">
+                    <p><strong>Goal:</strong> Understand how RL grows from simple tables to neural networks.</p>
+                    <div style="margin: 20px 0;">
+                        <div class="level-indicator level-1">Level 1</div>
+                        <span>Tabular Q-learning</span>
+                    </div>
+                    <div style="margin: 20px 0;">
+                        <div class="level-indicator level-2">Level 2</div>
+                        <span>Q-learning with tricks (replay, stability)</span>
+                    </div>
+                    <div style="margin: 20px 0;">
+                        <div class="level-indicator level-3">Level 3</div>
+                        <span>Deep Q-Network (DQN)</span>
+                    </div>
+                    <p style="margin-top: 20px;">This presentation walks through the evolution of reinforcement learning approaches, from basic table-based methods to advanced neural network solutions.</p>
+                </div>
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="slide" id="slide2">
+                <div class="slide-number">2</div>
+                <h2 class="slide-title">Common Setup (All Levels)</h2>
+
+                <!-- Scrollable body -->
+            <div class="scrollable-body custom-scrollbar">
+                <div style="padding: 15px;">
+                
+                    <div class="slide-content">
+
+                        <!-- picture -->
+                        <div style="flex: 1; min-width: 200px;">
+                            <img src="https://githubdiscrete12560.github.io/aichat/document/dqn_network/rl_loop_diagram_s2.svg" 
+                                 alt="Reinforcement Learning Diagram (created by claud.ai)"
+                                 style="width: 100%; border-radius: 8px;">
+                            <p style="text-align: center; font-size: 0.9rem;">Reinforcement Learning Diagram (created by claud.ai)</p>
+                        </div>
+
+                        
+                        <p><strong>Environment</strong> - Provides state, reward, next state</p>
+                        <p><strong>Agent</strong> - Chooses actions</p>
+                        <div class="analogy">
+                            <div class="analogy-title">Reinforcement Learning Loop:</div>
+                            <ol>
+                                <li>Observe state</li>
+                                <li>Take action</li>
+                                <li>Get reward + next state</li>
+                                <li>Learn from experience</li>
+                            </ol>
+                        </div>
+                        <p style="margin-top: 15px;">This basic interaction loop remains consistent across all RL levels, though the implementation details change significantly.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3 -->
+            <div class="slide" id="slide3">
+                <div class="slide-number">3</div>
+                <h2 class="slide-title"><span class="level-indicator level-1">Level 1</span> Tabular Q-Learning (Idea)</h2>
+                <div class="slide-content">
+                    <p><strong>State-action table (Q-table)</strong></p>
+                    <ul>
+                        <li>Rows = states</li>
+                        <li>Columns = actions</li>
+                    </ul>
+                    <p><strong>Learning:</strong> Update table entries directly based on experiences</p>
+                    <div class="analogy">
+                        <div class="analogy-title">Works when:</div>
+                        <ul>
+                            <li>States are small and discrete</li>
+                            <li>State space is manageable (not too large)</li>
+                            <li>Each state-action pair can be stored in memory</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 4 -->
+            <div class="slide" id="slide4">
+                <div class="slide-number">4</div>
+                <h2 class="slide-title"><span class="level-indicator level-1">Level 1</span><a href="https://githubdiscrete12560.github.io/aichat/document/dqn_network/q_learning_episodes_s4.html "> Simple Example</a></h2>
+                <div class="slide-content">
+                    <p><strong>State:</strong> Traffic light - red, yellow, green</p>
+                    <p><strong>Actions:</strong> stop, go</p>
+                    <p>The Q-table stores how good each action is in each state.</p>
+                    <div class="analogy">
+                        <div class="analogy-title">Human Analogy:</div>
+                        <p>Memorizing rules from experience. Like remembering that at a red light you should stop, and at a green light you can go.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 5 -->
+            <div class="slide" id="slide5">
+                <div class="slide-number">5</div>
+                <h2 class="slide-title">Why Level 1 Is Limited</h2>
+                <div class="slide-content">
+                    <p><strong>Problems with Tabular Q-Learning:</strong></p>
+                    <ul>
+                        <li>Too many states → huge table that doesn't fit in memory</li>
+                        <li>Continuous values impossible to represent in a table</li>
+                        <li>No generalization between similar states</li>
+                    </ul>
+                    <div class="analogy">
+                        <div class="analogy-title">Example: CartPole Problem</div>
+                        <p>CartPole has infinite possible states (continuous position, velocity, angle, angular velocity) → table-based approach breaks completely.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 6 -->
+            <div class="slide" id="slide6">
+                <div class="slide-number">6</div>
+                <h2 class="slide-title"><span class="level-indicator level-2">Level 2</span> Toward Generalization</h2>
+                <div class="slide-content">
+                    <p>Key ideas added to basic Q-learning:</p>
+                    <ul>
+                        <li>Same Q-learning update formula</li>
+                        <li>Focus on <strong>stability and reuse of experience</strong></li>
+                    </ul>
+                    <p><strong>Concepts introduced:</strong></p>
+                    <ul>
+                        <li>Replay memory (store and reuse past experiences)</li>
+                        <li>Delayed updates (separate target network)</li>
+                    </ul>
+                    <p>Level 2 is mostly conceptual - it sets the stage for neural network approaches but doesn't fully solve the generalization problem.</p>
+                </div>
+            </div>
+
+            <!-- Slide 7 -->
+            <div class="slide" id="slide7">
+                <div class="slide-number">7</div>
+                <h2 class="slide-title"><span class="level-indicator level-2">Level 2</span> Human Learning Analogy</h2>
+                <div class="slide-content">
+                    <div class="analogy">
+                        <div class="analogy-title">Instead of:</div>
+                        <p>Forgetting after each step (like tabular methods that don't reuse experiences)</p>
+                    </div>
+                    <div class="analogy" style="margin-top: 20px; border-left-color: #4caf50;">
+                        <div class="analogy-title" style="color: #4caf50;">We add:</div>
+                        <ul>
+                            <li>Remember past experiences</li>
+                            <li>Review them multiple times</li>
+                            <li>Learn patterns from accumulated experience</li>
+                        </ul>
+                    </div>
+                    <div class="analogy" style="margin-top: 20px;">
+                        <div class="analogy-title">Like:</div>
+                        <p>Practicing old exam questions to prepare for a test, rather than just reading the textbook once.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 8 -->
+            <div class="slide" id="slide8">
+                <div class="slide-number">8</div>
+                <h2 class="slide-title">Why We Need Level 3</h2>
+                <div class="slide-content">
+                    <p><strong>Reality of complex problems:</strong></p>
+                    <ul>
+                        <li>State space is continuous (like CartPole, robotics, games)</li>
+                        <li>Table-based representation is impossible</li>
+                        <li>We need generalization across similar states</li>
+                    </ul>
+                    <div style="margin: 20px 0; padding: 20px; background: rgba(156, 39, 176, 0.1); border-radius: 10px; border-left: 4px solid #9c27b0;">
+                        <p><strong>Solution:</strong> Replace Q-table with a neural network</p>
+                        <p>The neural network learns to approximate the Q-function: Q(s, a) ≈ Neural Network(s, a)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 9 -->
+            <div class="slide" id="slide9">
+                <div class="slide-number">9</div>
+                <h2 class="slide-title"><span class="level-indicator level-3">Level 3</span> Deep Q-Network (DQN)</h2>
+                <div class="slide-content">
+                    <div style="display: flex; flex-wrap: wrap; gap: 20px; margin: 20px 0;">
+                        <div style="flex: 1; min-width: 250px; padding: 15px; background: rgba(76, 201, 240, 0.1); border-radius: 10px;">
+                            <h3 style="color: #4cc9f0; margin-bottom: 10px;">What Changes</h3>
+                            <ul>
+                                <li>Q(s, a) ≈ Neural Network(s)</li>
+                                <li>Neural network replaces the Q-table</li>
+                                <li>Can handle continuous state spaces</li>
+                            </ul>
+                        </div>
+                        <div style="flex: 1; min-width: 250px; padding: 15px; background: rgba(67, 97, 238, 0.1); border-radius: 10px;">
+                            <h3 style="color: #4361ee; margin-bottom: 10px;">What Stays</h3>
+                            <ul>
+                                <li>Q-learning core idea</li>
+                                <li>Bellman equation for updates</li>
+                                <li>Goal of maximizing cumulative reward</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p>DQN combines the power of deep learning with reinforcement learning principles, enabling solutions to complex, high-dimensional problems.</p>
+                </div>
+            </div>
+
+            <!-- Slide 10 -->
+            <div class="slide" id="slide10">
+                <div class="slide-number">10</div>
+                <h2 class="slide-title">DQN Architecture</h2>
+                <div class="slide-content">
+                    <div style="display: flex; flex-wrap: wrap; gap: 20px; margin: 20px 0;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <img src="https://githubdiscrete12560.github.io/aichat/document/dqn_network/chatgpt_nn_s10.png" 
+                             alt="Curse of Dimensionality"
+                             style="width: 100%; border-radius: 8px;">
+                            <p style="text-align: center; font-size: 0.9rem;">DQN Network Diagram</p>
+                        </div>
+                        
+                        <div style="flex: 1; min-width: 200px; padding: 15px; background: rgba(76, 201, 240, 0.1); border-radius: 10px;">
+                            <h3 style="color: #4cc9f0; margin-bottom: 10px;">Input</h3>
+                            <p>State (e.g., 4 values in CartPole: position, velocity, angle, angular velocity)</p>
+                        </div>
+                        <div style="flex: 1; min-width: 200px; padding: 15px; background: rgba(67, 97, 238, 0.1); border-radius: 10px;">
+                            <h3 style="color: #4361ee; margin-bottom: 10px;">Hidden Layer</h3>
+                            <p>128 neurons with ReLU activation<br>Creates distributed representation</p>
+                        </div>
+                        <div style="flex: 1; min-width: 200px; padding: 15px; background: rgba(156, 39, 176, 0.1); border-radius: 10px;">
+                            <h3 style="color: #9c27b0; margin-bottom: 10px;">Output</h3>
+                            <p>Q-value for each possible action</p>
+                        </div>
+                    </div>
+                    <p>The network learns to map states to action values, enabling the agent to choose the best action in any given state.</p>
+                </div>
+            </div>
+
+            <!-- Slide 11 -->
+            <div class="slide" id="slide11">
+                <div class="slide-number">11</div>
+                <h2 class="slide-title">Why Neural Networks Help</h2>
+                <div class="slide-content">
+                    <p><strong>Neural networks enable:</strong></p>
+                    <ul>
+                        <li>Generalization across similar states</li>
+                        <li>Learning useful feature combinations automatically</li>
+                        <li>Handling continuous inputs naturally</li>
+                        <li>Scaling to high-dimensional state spaces</li>
+                    </ul>
+                    <div class="analogy">
+                        <div class="analogy-title">Human Analogy</div>
+                        <p>Recognizing patterns and applying them to new situations, rather than memorizing every specific case. Like learning to drive in different conditions rather than memorizing every possible road scenario.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 12 -->
+            <div class="slide" id="slide12">
+                <div class="slide-number">12</div>
+                <h2 class="slide-title">Replay Buffer (Memory)</h2>
+                <div class="slide-content">
+                    <p><strong>Stores experiences as tuples:</strong></p>
+                    <ul>
+                        <li>state</li>
+                        <li>action</li>
+                        <li>reward</li>
+                        <li>next_state</li>
+                        <li>done (whether episode ended)</li>
+                    </ul>
+                    <div style="margin: 20px 0; padding: 15px; background: rgba(67, 97, 238, 0.1); border-radius: 10px;">
+                        <p><strong>Why use replay buffer?</strong></p>
+                        <ul>
+                            <li>Break temporal correlation between consecutive experiences</li>
+                            <li>Learn from past experiences multiple times</li>
+                            <li>Improve sample efficiency</li>
+                            <li>Stabilize training</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 13 -->
+            <div class="slide" id="slide13">
+                <div class="slide-number">13</div>
+                <h2 class="slide-title">Target Network (Stability)</h2>
+                <div class="slide-content">
+                    <div class="analogy">
+                        <div class="analogy-title">Problem:</div>
+                        <p>Network learning from itself causes moving target problem and instability</p>
+                    </div>
+                    <div class="analogy" style="margin-top: 20px; border-left-color: #4caf50;">
+                        <div class="analogy-title" style="color: #4caf50;">Solution:</div>
+                        <p>Keep a delayed copy (target network) and update it slowly</p>
+                    </div>
+                    <div style="margin: 20px 0; padding: 15px; background: rgba(249, 168, 37, 0.1); border-radius: 10px;">
+                        <p><strong>Important distinction:</strong> Target ≠ goal</p>
+                        <p><strong>Target</strong> = stable reference value for Q-learning updates<br>
+                        <strong>Goal</strong> = what the agent is trying to achieve (maximize reward)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 14 -->
+            <div class="slide" id="slide14">
+                <div class="slide-number">14</div>
+                <h2 class="slide-title">Forward vs Backward (Level 3)</h2>
+                <div class="slide-content">
+                    <div style="display: flex; flex-wrap: wrap; gap: 20px; margin: 20px 0;">
+                        <div style="flex: 1; min-width: 250px; padding: 15px; background: rgba(76, 201, 240, 0.1); border-radius: 10px;">
+                            <h3 style="color: #4cc9f0; margin-bottom: 10px;">Forward Pass</h3>
+                            <p>Network processes state to decide action</p>
+                            <p>Input → Hidden layers → Q-values → Action selection</p>
+                        </div>
+                        <div style="flex: 1; min-width: 250px; padding: 15px; background: rgba(67, 97, 238, 0.1); border-radius: 10px;">
+                            <h3 style="color: #4361ee; margin-bottom: 10px;">Loss Computation</h3>
+                            <p>Compare predicted Q vs target Q</p>
+                            <p>Use MSE loss: (Q_predicted - Q_target)²</p>
+                        </div>
+                        <div style="flex: 1; min-width: 250px; padding: 15px; background: rgba(156, 39, 176, 0.1); border-radius: 10px;">
+                            <h3 style="color: #9c27b0; margin-bottom: 10px;">Backward Pass</h3>
+                            <p>Update network weights via backpropagation</p>
+                            <p>Minimize loss to improve Q-value predictions</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 15 -->
+            <div class="slide" id="slide15">
+                <div class="slide-number">15</div>
+                <h2 class="slide-title">Full DQN Code (VS Code Ready)</h2>
+                <div class="slide-content">
+                    <p>Below is a complete minimal example of DQN implementation. This code is ready to run in VS Code or any Python environment with the required dependencies.</p>
+                    <div class="analogy">
+                        <div class="analogy-title">Prerequisites:</div>
+                        <p>Install: <code>gymnasium</code>, <code>torch</code>, <code>numpy</code></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 16 -->
+            <div class="slide" id="slide16">
+                <div class="slide-number">16</div>
+                <h2 class="slide-title">Full Code: Imports</h2>
+                <div class="slide-content">
+                    <div class="code-block">
+                        <pre><span class="keyword">import</span> gymnasium <span class="keyword">as</span> gym
+<span class="keyword">import</span> random
+<span class="keyword">from</span> collections <span class="keyword">import</span> deque
+<span class="keyword">import</span> torch
+<span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn
+<span class="keyword">import</span> torch.optim <span class="keyword">as</span> optim
+<span class="keyword">import</span> numpy <span class="keyword">as</span> np</pre>
+                    </div>
+                    <p>These imports provide:</p>
+                    <ul>
+                        <li><code>gymnasium</code>: RL environments (successor to OpenAI Gym)</li>
+                        <li><code>deque</code>: Efficient replay buffer implementation</li>
+                        <li><code>torch</code>: PyTorch for neural networks and autograd</li>
+                        <li><code>numpy</code>: Numerical operations</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Slide 17 -->
+            <div class="slide" id="slide17">
+                <div class="slide-number">17</div>
+                <h2 class="slide-title">Q-Network</h2>
+                <div class="slide-content">
+                    <div class="code-block">
+                        <pre><span class="keyword">class</span> <span class="class">QNetwork</span>(nn.Module):
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, state_dim, action_dim):
+        <span class="keyword">super</span>().<span class="function">__init__</span>()
+        <span class="keyword">self</span>.net = nn.Sequential(
+            nn.Linear(state_dim, <span class="number">128</span>),
+            nn.ReLU(),
+            nn.Linear(<span class="number">128</span>, action_dim)
+        )
+    
+    <span class="keyword">def</span> <span class="function">forward</span>(<span class="keyword">self</span>, x):
+        <span class="keyword">return</span> <span class="keyword">self</span>.net(x)</pre>
+                    </div>
+                    <p>This simple neural network:</p>
+                    <ul>
+                        <li>Takes state as input (dimension = <code>state_dim</code>)</li>
+                        <li>Has one hidden layer with 128 neurons and ReLU activation</li>
+                        <li>Outputs Q-values for each action (dimension = <code>action_dim</code>)</li>
+                        <li>Uses PyTorch's <code>nn.Sequential</code> for easy layer stacking</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Slide 18 -->
+            <div class="slide" id="slide18">
+                <div class="slide-number">18</div>
+                <h2 class="slide-title">Replay Buffer</h2>
+                <div class="slide-content">
+                    <div class="code-block">
+                        <pre><span class="keyword">class</span> <span class="class">ReplayBuffer</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="keyword">self</span>, capacity=<span class="number">10000</span>):
+        <span class="keyword">self</span>.buffer = deque(maxlen=capacity)
+    
+    <span class="keyword">def</span> <span class="function">push</span>(<span class="keyword">self</span>, s, a, r, ns, d):
+        <span class="keyword">self</span>.buffer.append((s, a, r, ns, d))
+    
+    <span class="keyword">def</span> <span class="function">sample</span>(<span class="keyword">self</span>, batch_size):
+        batch = random.sample(<span class="keyword">self</span>.buffer, batch_size)
+        s, a, r, ns, d = zip(*batch)
+        <span class="keyword">return</span> (
+            torch.tensor(s, dtype=torch.float32),
+            torch.tensor(a, dtype=torch.int64),
+            torch.tensor(r, dtype=torch.float32),
+            torch.tensor(ns, dtype=torch.float32),
+            torch.tensor(d, dtype=torch.float32),
+        )
+    
+    <span class="keyword">def</span> <span class="function">__len__</span>(<span class="keyword">self</span>):
+        <span class="keyword">return</span> len(<span class="keyword">self</span>.buffer)</pre>
+                    </div>
+                    <p>The replay buffer:</p>
+                    <ul>
+                        <li>Stores experiences (state, action, reward, next_state, done)</li>
+                        <li>Uses <code>deque</code> with fixed capacity (FIFO when full)</li>
+                        <li>Randomly samples batches for training</li>
+                        <li>Converts samples to PyTorch tensors for GPU compatibility</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Slide 19 -->
+            <div class="slide" id="slide19">
+                <div class="slide-number">19</div>
+                <h2 class="slide-title">Training Step</h2>
+                <div class="slide-content">
+                    <div class="code-block">
+                        <pre><span class="keyword">def</span> <span class="function">train_step</span>():
+    <span class="keyword">if</span> len(buffer) &lt; BATCH_SIZE:
+        <span class="keyword">return</span>
+    
+    s, a, r, ns, d = buffer.sample(BATCH_SIZE)
+    
+    <span class="comment"># Current Q values</span>
+    q = policy_net(s).gather(<span class="number">1</span>, a.unsqueeze(<span class="number">1</span>)).squeeze(<span class="number">1</span>)
+    
+    <span class="keyword">with</span> torch.no_grad():
+        <span class="comment"># Target Q values</span>
+        target = r + GAMMA * target_net(ns).max(<span class="number">1</span>)[<span class="number">0</span>] * (<span class="number">1</span> - d)
+    
+    <span class="comment"># Compute loss</span>
+    loss = nn.MSELoss()(q, target)
+    
+    <span class="comment"># Optimize</span>
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()</pre>
+                    </div>
+                    <p>Each training step:</p>
+                    <ol>
+                        <li>Samples a batch from replay buffer</li>
+                        <li>Computes current Q-values for taken actions</li>
+                        <li>Computes target Q-values using target network</li>
+                        <li>Calculates MSE loss between current and target Q-values</li>
+                        <li>Performs backpropagation to update policy network</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Slide 20 -->
+            <div class="slide" id="slide20">
+                <div class="slide-number">20</div>
+                <h2 class="slide-title">Main Loop</h2>
+                <div class="slide-content">
+                    <div class="code-block">
+                        <pre><span class="keyword">for</span> episode <span class="keyword">in</span> range(<span class="number">500</span>):
+    state, _ = env.reset()
+    total_reward = <span class="number">0</span>
+    
+    <span class="keyword">while</span> <span class="keyword">True</span>:
+        action = select_action(state)
+        next_state, reward, done, _, _ = env.step(action)
+        
+        buffer.push(state, action, reward, next_state, done)
+        state = next_state
+        total_reward += reward
+        
+        train_step()
+        
+        <span class="keyword">if</span> done:
+            <span class="keyword">break</span></pre>
+                    </div>
+                    <p>The main training loop:</p>
+                    <ul>
+                        <li>Runs for 500 episodes</li>
+                        <li>Resets environment at the start of each episode</li>
+                        <li>Interacts with environment, stores experiences in buffer</li>
+                        <li>Trains the network after each step</li>
+                        <li>Tracks total reward per episode</li>
+                    </ul>
+                    <p><strong>Note:</strong> <code>select_action()</code> function (not shown) implements ε-greedy exploration.</p>
+                </div>
+            </div>
+
+            <!-- Slide 21 -->
+            <div class="slide" id="slide21">
+                <div class="slide-number">21</div>
+                <h2 class="slide-title">Summary of Levels</h2>
+                <div class="slide-content">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Level</th>
+                                <th>Representation</th>
+                                <th>Key Idea</th>
+                                <th>When to Use</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="level-indicator level-1">1</span></td>
+                                <td>Q-table</td>
+                                <td>Memorization</td>
+                                <td>Small, discrete state spaces</td>
+                            </tr>
+                            <tr>
+                                <td><span class="level-indicator level-2">2</span></td>
+                                <td>Q-learning + memory</td>
+                                <td>Stability</td>
+                                <td>Medium problems, need for experience reuse</td>
+                            </tr>
+                            <tr>
+                                <td><span class="level-indicator level-3">3</span></td>
+                                <td>Neural network (DQN)</td>
+                                <td>Generalization</td>
+                                <td>Large, continuous state spaces</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 25px; padding: 20px; background: rgba(76, 201, 240, 0.1); border-radius: 10px;">
+                        <p><strong>Evolution path:</strong> RL evolves from memorizing specific values (Level 1) to learning stable representations (Level 2) to generalizing across states (Level 3).</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 22 -->
+            <div class="slide" id="slide22">
+                <div class="slide-number">22</div>
+                <h2 class="slide-title">Final Takeaway</h2>
+                <div class="slide-content">
+                    <div style="text-align: center; padding: 30px;">
+                        <div style="font-size: 1.5rem; color: #4cc9f0; margin-bottom: 20px;">
+                            <i class="fas fa-brain" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                            <p>RL evolves from memorizing values to learning representations.</p>
+                        </div>
+                        <div style="display: flex; justify-content: center; gap: 30px; margin-top: 30px; flex-wrap: wrap;">
+                            <div style="text-align: center;">
+                                <div class="level-indicator level-1" style="margin: 0 auto 10px;">Level 1</div>
+                                <p>Memorization</p>
+                            </div>
+                            <div style="text-align: center;">
+                                <i class="fas fa-arrow-right" style="color: #b8c1ec; font-size: 1.5rem; margin-top: 15px;"></i>
+                            </div>
+                            <div style="text-align: center;">
+                                <div class="level-indicator level-2" style="margin: 0 auto 10px;">Level 2</div>
+                                <p>Stability</p>
+                            </div>
+                            <div style="text-align: center;">
+                                <i class="fas fa-arrow-right" style="color: #b8c1ec; font-size: 1.5rem; margin-top: 15px;"></i>
+                            </div>
+                            <div style="text-align: center;">
+                                <div class="level-indicator level-3" style="margin: 0 auto 10px;">Level 3</div>
+                                <p>Generalization</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="margin-top: 30px; text-align: center;">Deep Q-Networks combine the best of deep learning and reinforcement learning, enabling agents to solve complex problems by learning useful representations from high-dimensional inputs.</p>
+                </div>
+            </div>
+        </main>
+
+        <div class="navigation">
+            <button class="nav-btn" id="prevBtn" onclick="prevSlide()">
+                <i class="fas fa-chevron-left"></i> Previous
+            </button>
+            
+            <div class="slide-indicators" id="slideIndicators">
+                <!-- Indicators will be generated by JavaScript -->
+            </div>
+            
+            <button class="nav-btn" id="nextBtn" onclick="nextSlide()">
+                Next <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <div class="footer">
+            <p>Reinforcement Learning: Levels 1-3 Explained (with DQN Code) | Presentation based on original PDF content</p>
+            <p>Created with HTML, CSS, and JavaScript | Code syntax highlighting for better readability</p>
+        </div>
+    </div>
+
+    <script>
+        // Current slide index
+        let currentSlide = 0;
+        const totalSlides = 22;
+        
+        // Initialize slide indicators
+        const indicatorsContainer = document.getElementById('slideIndicators');
+        for (let i = 0; i < totalSlides; i++) {
+            const indicator = document.createElement('div');
+            indicator.className = 'slide-indicator';
+            if (i === 0) indicator.classList.add('active');
+            indicator.setAttribute('data-index', i);
+            indicator.onclick = () => goToSlide(i);
+            indicatorsContainer.appendChild(indicator);
+        }
+        
+        // Function to update active slide
+        function updateActiveSlide() {
+            // Update indicators
+            document.querySelectorAll('.slide-indicator').forEach((indicator, index) => {
+                if (index === currentSlide) {
+                    indicator.classList.add('active');
+                } else {
+                    indicator.classList.remove('active');
+                }
+            });
+            
+            // Update buttons
+            document.getElementById('prevBtn').disabled = currentSlide === 0;
+            document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+            
+            // Scroll to current slide
+            document.getElementById(`slide${currentSlide + 1}`).scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+        
+        // Navigation functions
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateActiveSlide();
+            }
+        }
+        
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateActiveSlide();
+            }
+        }
+        
+        function goToSlide(index) {
+            currentSlide = index;
+            updateActiveSlide();
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            } else if (e.key >= '1' && e.key <= '9') {
+                // Go to specific slide with number keys (1-9)
+                const slideNum = parseInt(e.key) - 1;
+                if (slideNum < totalSlides) {
+                    goToSlide(slideNum);
+                }
+            }
+        });
+        
+        // Initialize
+        updateActiveSlide();
+        
+        // Add code highlighting
+        document.querySelectorAll('.code-block pre').forEach(block => {
+            const code = block.innerHTML;
+            
+            // Apply syntax highlighting
+            let highlighted = code
+                .replace(/\b(class|def|import|from|as|return|if|else|while|for|in|range|True|False|None|with)\b/g, '<span class="keyword">$1</span>')
+                .replace(/\b(QNetwork|ReplayBuffer|train_step|__init__|forward|push|sample|__len__)\b/g, '<span class="function">$1</span>')
+                .replace(/\b(nn\.Module|nn\.Sequential|nn\.Linear|nn\.ReLU|nn\.MSELoss|deque|torch|gym|optim)\b/g, '<span class="class">$1</span>')
+                .replace(/(\d+)/g, '<span class="number">$1</span>')
+                .replace(/# (.*?)(?=\n|$)/g, '<span class="comment"># $1</span>');
+            
+            block.innerHTML = highlighted;
+        });
+    </script>
+</body>
+</html>
