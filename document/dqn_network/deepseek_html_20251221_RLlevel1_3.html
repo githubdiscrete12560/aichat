@@ -286,6 +286,39 @@
         .slide-indicator:hover {
             background: #4361ee;
         }
+        /* Add this to your CSS */
+        .scrollable-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .scrollable-body {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        /* Custom scrollbar styling */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(30, 30, 40, 0.8);
+            border-radius: 5px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #4cc9f0, #4361ee);
+            border-radius: 5px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, #4361ee, #9c27b0);
+        }
+        
+       
 
         @media (max-width: 768px) {
             .container {
@@ -350,19 +383,35 @@
             <div class="slide" id="slide2">
                 <div class="slide-number">2</div>
                 <h2 class="slide-title">Common Setup (All Levels)</h2>
-                <div class="slide-content">
-                    <p><strong>Environment</strong> - Provides state, reward, next state</p>
-                    <p><strong>Agent</strong> - Chooses actions</p>
-                    <div class="analogy">
-                        <div class="analogy-title">Reinforcement Learning Loop:</div>
-                        <ol>
-                            <li>Observe state</li>
-                            <li>Take action</li>
-                            <li>Get reward + next state</li>
-                            <li>Learn from experience</li>
-                        </ol>
+
+                <!-- Scrollable body -->
+            <div class="scrollable-body custom-scrollbar">
+                <div style="padding: 15px;">
+                
+                    <div class="slide-content">
+
+                        <!-- picture -->
+                        <div style="flex: 1; min-width: 200px;">
+                            <img src="https://githubdiscrete12560.github.io/aichat/document/dqn_network/rl_loop_diagram_s2.svg" 
+                                 alt="Reinforcement Learning Diagram (created by claud.ai)"
+                                 style="width: 100%; border-radius: 8px;">
+                            <p style="text-align: center; font-size: 0.9rem;">Curse of Dimensionality</p>
+                        </div>
+
+                        
+                        <p><strong>Environment</strong> - Provides state, reward, next state</p>
+                        <p><strong>Agent</strong> - Chooses actions</p>
+                        <div class="analogy">
+                            <div class="analogy-title">Reinforcement Learning Loop:</div>
+                            <ol>
+                                <li>Observe state</li>
+                                <li>Take action</li>
+                                <li>Get reward + next state</li>
+                                <li>Learn from experience</li>
+                            </ol>
+                        </div>
+                        <p style="margin-top: 15px;">This basic interaction loop remains consistent across all RL levels, though the implementation details change significantly.</p>
                     </div>
-                    <p style="margin-top: 15px;">This basic interaction loop remains consistent across all RL levels, though the implementation details change significantly.</p>
                 </div>
             </div>
 
