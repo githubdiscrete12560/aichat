@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q-Learning Episodes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        .parameters {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+
+        .parameters h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .param {
+            display: inline-block;
+            margin: 5px 15px 5px 0;
+            font-size: 1em;
+        }
+
+        .param strong {
+            color: #333;
+        }
+
+        .episode-container {
+            margin-bottom: 40px;
+        }
+
+        .episode-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px 10px 0 0;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .episode-content {
+            border: 3px solid #667eea;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            padding: 25px;
+            background: #fafafa;
+        }
+
+        .step {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #4caf50;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .step-header {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .step-number {
+            background: #4caf50;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.1em;
+        }
+
+        .step-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .detail-box {
+            background: #e3f2fd;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid #2196f3;
+        }
+
+        .detail-label {
+            font-weight: bold;
+            color: #1976d2;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .traffic-light {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .light {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .red { background: #f44336; }
+        .yellow { background: #ffc107; }
+        .green { background: #4caf50; }
+
+        .formula {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ff9800;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .formula-title {
+            font-weight: bold;
+            color: #f57c00;
+            margin-bottom: 8px;
+        }
+
+        .q-table {
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .q-value {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .updated {
+            background: #c8e6c9 !important;
+            animation: highlight 1s ease;
+        }
+
+        @keyframes highlight {
+            0% { background: #ffeb3b; }
+            100% { background: #c8e6c9; }
+        }
+
+        .reward-positive {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .reward-negative {
+            color: #f44336;
+            font-weight: bold;
+        }
+
+        .action-stop {
+            color: #f44336;
+            font-weight: bold;
+        }
+
+        .action-go {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        .note {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4caf50;
+            margin-top: 15px;
+            font-style: italic;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚦 Q-Learning: First 3 Episodes</h1>
+        <p class="subtitle">Traffic Light Example - Learning from Experience</p>
+
+        <div class="parameters">
+            <h3>Q-Learning Parameters:</h3>
+            <div class="param"><strong>Learning Rate (α):</strong> 0.1</div>
+            <div class="param"><strong>Discount Factor (γ):</strong> 0.9</div>
+            <div class="param"><strong>Exploration:</strong> ε-greedy (random initially)</div>
+            <div class="param"><strong>Rewards:</strong> +10 (good), -10 (bad)</div>
+        </div>
+
+        <!-- EPISODE 1 -->
+        <div class="episode-container">
+            <div class="episode-header">📍 Episode 1</div>
+            <div class="episode-content">
+                
+                <div class="step">
+                    <div class="step-header">
+                        <div class="step-number">1</div>
+                        <span>Agent Starts at Red Light</span>
+                    </div>
+                    <div class="step-details">
+                        <div class="detail-box">
+                            <div class="detail-label">Current State:</div>
+                            <div class="detail-value traffic-light">
+                                <span class="light red"></span> Red Light
+                            </div>
+                        </div>
+                        <div class="detail-box">
+                            <div class="detail-label">Action Taken:</div>
+                            <div class="detail-value action-go">GO (random exploration)</div>
+                        </div>
+                        <div class="detail-box">
+                            <div class="detail-label">Reward Received:</div>
+                            <div class="detail-value reward-negative">-10 (accident!)</div>
+                        </div>
+                        <div class="detail-box">
+                            <div class="detail-label">Next State:</div>
+                            <div class="detail-value">Terminal (episode ends)</div>
+                        </div>
+                    </div>
+
+                    <div class="formula">
+                        <div class="formula-title">Q-Value Update:</div>
+                        <div>Q(Red, GO) = 0 + 0.1 × [(-10) + 0.9 × 0 - 0]</div>
+                        <div>Q(Red, GO) = 0 + 0.1 × (-10)</div>
+                        <div><strong>Q(Red, GO) = -1.0</strong></div>
+                    </div>
+
+                    <div class="note">
+                        💡 The agent learns that going on red is bad! Q-value becomes negative.
+                    </div>
+                </div>
+
+                <div class="q-table">
+                    <h4 style="margin-bottom: 10px; color: #667eea;">Q-Table After Episode 1:</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>State</th>
+                                <th>STOP</th>
+                                <th>GO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="updated">
+                                <td><span class="light red"></span> Red</td>
+                                <td class="q-value">0.0</td>
+                                <td class="q-value">-1.0</td>
+                            </tr>
+                            <tr>
+                                <td><span class="light yellow"></span> Yellow</td>
+                                <td class="q-value">0.0</td>
+                                <td class="q-value">0.0</td>
+                            </tr>
+                            <tr>
+                                <td><span class="light green"></span> Green</td>
+                                <td class="q-value">0.0</td>
+                                <td class="q-value">0.0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- EPISODE 2 -->
+        <div class="episode-container">
+            <div class="episode-header">📍 Episode 2</div>
+            <div class="episode-content">
+                
+                <div class="step">
+                    <div class="step-header">
+                        <div class="step-number">1</div>
+                        <span>Agent Starts at Green Light</span>
+                    </div>
+                    <div class="step-details">
+                        <div class="detail-box">
+                            <div class="detail-label">Current State:</div>
+                            <div class="detail-value traffic-light">
+                                <span class="light green"></span> Green Light
+                            </div>
+                        </div>
+                        <div class="detail-box">
+                            <div class="detail-label">Action Taken:</div>
+                            <div class="detail-value action-stop">STOP (random exploration)</div>
+                        </div>
+                        <div class="detail-box">
+                            <div class="detail-label">Reward Received:</div>
+                            <div class="detail-value reward-negative">-10 (wasteful!)</div>
+                        </div>
+                        <div class="detail-box">
+                            <div class="detail-label">Next State:</div>
+                            <div class="detail-value">Terminal (episode ends)</div>
+                        </div>
+                    </div>
+
+                    <div class="formula">
+                        <div class="formula-title">Q-Value Update:</div>
+                        <div>Q(Green, STOP) = 0 + 0.1 × [(-10) + 0.9 × 0 - 0]</div>
+                        <div>Q(Green, STOP) = 0 + 0.1 × (-10)</div>
+                        <div><strong>Q(Green, STOP) = -1.0</strong></div>
+                    </div>
+
+                    <div class="note">
+                        💡 The agent learns that stopping on green is also bad! Another negative Q-value.
+                    </div>
+                </div>
+
+                <div class="q-table">
+                    <h4 style="margin-bottom: 10px; color: #667eea;">Q-Table After Episode 2:</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>State</th>
+                                <th>STOP</th>
+                                <th>GO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="light red"></span> Red</td>
+                                <td class="q-value">0.0</td>
+                                <td class="q-value">-1.0</td>
+                            </tr>
+                            <tr>
+                                <td><span class="light yellow"></span> Yellow</td>
+                                <td class="q-value">0.0</td>
+                                <td class="q-value">0.0</td>
+                            </tr>
+                            <tr class="updated">
+                                <td><span class="light green"></span> Green</td>
+                                <td class="q-value">-1.0</td>
+                                <td class="q-value">0.0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- EPISODE 3 -->
+        <div class="episode-container">
+            <div class="episode-header">📍 Episode 3</div>
+            <div class="episode-content">
+                
+                <div class="step">
+                    <div class="step-header">
+                        <div class="step-number">1</div>
+                        <span>Agent Starts at Red Light</span>
+                    </div>
+                    <div class="step-details">
+                        <div class="detail-box">
+                            <div class="detail-label">Current State:</div>
+                            <div class="detail-value traffic-light">
+                                <span class="light red"></span> Red Light
+                            </div>
+                        </div>
+                        <div class="detail-box">
+                            <div class="detail-label">Action Taken:</div>
+                            <div class="detail-value action-stop">STOP (exploring other option)</div>
+                        </div>
+                        <div class="detail-box">
+                            <div class="detail-label">Reward Received:</div>
+                            <div class="detail-value reward-positive">+10 (safe!)</div>
+                        </div>
+                        <div class="detail-box">
+                            <div class="detail-label">Next State:</div>
+                            <div class="detail-value">Terminal (episode ends)</div>
+                        </div>
+                    </div>
+
+                    <div class="formula">
+                        <div class="formula-title">Q-Value Update:</div>
+                        <div>Q(Red, STOP) = 0 + 0.1 × [(+10) + 0.9 × 0 - 0]</div>
+                        <div>Q(Red, STOP) = 0 + 0.1 × 10</div>
+                        <div><strong>Q(Red, STOP) = +1.0</strong></div>
+                    </div>
+
+                    <div class="note">
+                        💡 Success! The agent learns that stopping on red is good! First positive Q-value!
+                    </div>
+                </div>
+
+                <div class="q-table">
+                    <h4 style="margin-bottom: 10px; color: #667eea;">Q-Table After Episode 3:</h4>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>State</th>
+                                <th>STOP</th>
+                                <th>GO</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="updated">
+                                <td><span class="light red"></span> Red</td>
+                                <td class="q-value" style="color: #4caf50;">+1.0</td>
+                                <td class="q-value" style="color: #f44336;">-1.0</td>
+                            </tr>
+                            <tr>
+                                <td><span class="light yellow"></span> Yellow</td>
+                                <td class="q-value">0.0</td>
+                                <td class="q-value">0.0</td>
+                            </tr>
+                            <tr>
+                                <td><span class="light green"></span> Green</td>
+                                <td class="q-value" style="color: #f44336;">-1.0</td>
+                                <td class="q-value">0.0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="background: #e3f2fd; padding: 20px; border-radius: 10px; margin-top: 20px; border-left: 5px solid #2196f3;">
+                    <h4 style="color: #1976d2; margin-bottom: 10px;">🎯 Progress Summary:</h4>
+                    <p style="color: #333; line-height: 1.6;">
+                        After just 3 episodes, the agent is starting to learn! It now knows:
+                    </p>
+                    <ul style="color: #333; margin-top: 10px; margin-left: 20px; line-height: 1.8;">
+                        <li><strong>Red Light:</strong> STOP is better than GO (+1.0 vs -1.0)</li>
+                        <li><strong>Green Light:</strong> GO might be better than STOP (0.0 vs -1.0)</li>
+                        <li><strong>Yellow Light:</strong> Still unexplored (both 0.0)</li>
+                    </ul>
+                    <p style="color: #333; margin-top: 15px; font-style: italic;">
+                        With more episodes, the Q-values will converge to optimal values and the agent will consistently make safe decisions!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Skip to convergence -->
+        <div style="text-align: center; margin: 40px 0;">
+            <div style="display: inline-block; background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%); color: white; padding: 15px 40px; border-radius: 50px; font-size: 1.3em; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                ⏩ ... Episodes 4-999 (Learning Continues) ...
+            </div>
+        </div>
+
+        <!-- EPISODE 1000 - CONVERGENCE -->
+        <div class="episode-container">
+            <div class="episode-header" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                ✅ Episode 1000 - CONVERGENCE ACHIEVED!
+            </div>
+            <div class="episode-content">
+                
+                <div style="background: #fff3cd; padding: 20px; border-radius: 10px; margin-bottom: 20px; border-left: 5px solid #ff9800;">
+                    <h4 style="color: #f57c00; margin-bottom: 10px;">🔍 Stopping Conditions Met:</h4>
+                    <ul style="color: #333; margin-left: 20px; line-height: 1.8;">
+                        <li><strong>Condition 1:</strong> Maximum episodes reached (1000 episodes)</li>
+                        <li><strong>Condition 2:</strong> Q-values have converged (changes &lt; 0.001 for 100 consecutive episodes)</li>
+                        <li><strong>Condition 3:</strong> Policy is stable (agent consistently chooses optimal actions)</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-header">
+                        <div class="step-number">✓</div>
+                        <span>Final Q-Table - Optimal Policy Learned!</span>
+                    </div>
+
+                    <div class="q-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>State</th>
+                                    <th>STOP</th>
+                                    <th>GO</th>
+                                    <th>Best Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="background: #c8e6c9;">
+                                    <td><span class="light red"></span> Red</td>
+                                    <td class="q-value" style="color: #4caf50; font-size: 1.3em;">+10.0</td>
+                                    <td class="q-value" style="color: #f44336; font-size: 1.3em;">-10.0</td>
+                                    <td style="font-weight: bold; color: #4caf50;">🛑 STOP</td>
+                                </tr>
+                                <tr style="background: #fff9c4;">
+                                    <td><span class="light yellow"></span> Yellow</td>
+                                    <td class="q-value" style="color: #ff9800; font-size: 1.3em;">+5.0</td>
+                                    <td class="q-value" style="color: #f44336; font-size: 1.3em;">-5.0</td>
+                                    <td style="font-weight: bold; color: #ff9800;">🛑 STOP</td>
+                                </tr>
+                                <tr style="background: #c8e6c9;">
+                                    <td><span class="light green"></span> Green</td>
+                                    <td class="q-value" style="color: #f44336; font-size: 1.3em;">-10.0</td>
+                                    <td class="q-value" style="color: #4caf50; font-size: 1.3em;">+10.0</td>
+                                    <td style="font-weight: bold; color: #4caf50;">▶️ GO</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="note" style="margin-top: 20px;">
+                        💡 <strong>Perfect Policy Achieved!</strong> The agent now knows exactly what to do in every situation:
+                        <ul style="margin-top: 10px; margin-left: 20px;">
+                            <li>Red Light → STOP (Q = +10.0)</li>
+                            <li>Yellow Light → STOP (Q = +5.0)</li>
+                            <li>Green Light → GO (Q = +10.0)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="background: #e8f5e9; padding: 25px; border-radius: 10px; margin-top: 20px; border-left: 5px solid #4caf50;">
+                    <h4 style="color: #2e7d32; margin-bottom: 15px;">📊 Training Statistics:</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <div style="background: white; padding: 15px; border-radius: 8px;">
+                            <div style="color: #666; font-size: 0.9em;">Total Episodes</div>
+                            <div style="color: #2e7d32; font-size: 1.8em; font-weight: bold;">1,000</div>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 8px;">
+                            <div style="color: #666; font-size: 0.9em;">Convergence Episode</div>
+                            <div style="color: #2e7d32; font-size: 1.8em; font-weight: bold;">~850</div>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 8px;">
+                            <div style="color: #666; font-size: 0.9em;">Exploration Rate</div>
+                            <div style="color: #2e7d32; font-size: 1.8em; font-weight: bold;">5% → 0%</div>
+                        </div>
+                        <div style="background: white; padding: 15px; border-radius: 8px;">
+                            <div style="color: #666; font-size: 0.9em;">Policy Accuracy</div>
+                            <div style="color: #2e7d32; font-size: 1.8em; font-weight: bold;">100%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: #f3e5f5; padding: 25px; border-radius: 10px; margin-top: 20px; border-left: 5px solid #9c27b0;">
+                    <h4 style="color: #7b1fa2; margin-bottom: 15px;">🎓 Key Learning Insights:</h4>
+                    <div style="color: #333; line-height: 1.8;">
+                        <p><strong>1. Exploration vs Exploitation:</strong> The agent started with random exploration (high ε) and gradually shifted to exploitation of learned knowledge (low ε).</p>
+                        
+                        <p style="margin-top: 12px;"><strong>2. Q-Value Convergence:</strong> Through repeated experience, Q-values stabilized at their optimal values representing the true expected rewards.</p>
+                        
+                        <p style="margin-top: 12px;"><strong>3. Optimal Policy Extraction:</strong> Once converged, the policy is simple: choose the action with the highest Q-value in each state.</p>
+                        
+                        <p style="margin-top: 12px;"><strong>4. Stopping Criteria:</strong> Training stopped when:</p>
+                        <ul style="margin-left: 20px; margin-top: 8px;">
+                            <li>Q-values changed by less than 0.001 (convergence threshold)</li>
+                            <li>This stability persisted for 100+ consecutive episodes</li>
+                            <li>Maximum episode limit (1000) was reached</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 10px; margin-top: 20px; text-align: center;">
+                    <h3 style="margin-bottom: 15px; font-size: 1.8em;">🎉 Mission Accomplished!</h3>
+                    <p style="font-size: 1.2em; line-height: 1.6;">
+                        The agent has successfully learned the optimal traffic light policy through trial and error. 
+                        It can now safely navigate any traffic light scenario!
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
