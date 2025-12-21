@@ -1,0 +1,2414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>From Q-Learning to Deep Q-Networks (DQN) - Complete Tutorial</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0d47a1 0%, #311b92 100%);
+            color: #f5f5f5;
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #00e5ff, #ff6b6b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto 20px;
+        }
+        
+        .presentation-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .slide-counter {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 1.1rem;
+        }
+        
+        .slides-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .slide {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .slide:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+        
+        .slide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .slide-title {
+            font-size: 1.8rem;
+            color: #00e5ff;
+            font-weight: 600;
+        }
+        
+        .slide-number {
+            background: rgba(0, 229, 255, 0.2);
+            color: #00e5ff;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .slide-content {
+            font-size: 1.1rem;
+        }
+        
+        .formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            border-left: 4px solid #ff6b6b;
+            overflow-x: auto;
+        }
+        
+        .formula.large {
+            font-size: 1.4rem;
+        }
+        
+        .comparison-table {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .comparison-col {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .comparison-title {
+            font-weight: bold;
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.3rem;
+        }
+        
+        .key-insight {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 0 10px 10px 0;
+            margin: 25px 0;
+        }
+        
+        .key-insight h3 {
+            color: #ffc107;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .analogy {
+            background: rgba(76, 175, 80, 0.1);
+            border-left: 4px solid #4caf50;
+            padding: 20px;
+            border-radius: 0 10px 10px 0;
+            margin: 25px 0;
+        }
+        
+        .analogy h3 {
+            color: #4caf50;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        th {
+            background: rgba(255, 107, 107, 0.2);
+            color: #ff6b6b;
+            font-weight: 600;
+        }
+        
+        .example-box {
+            background: rgba(0, 229, 255, 0.1);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .example-title {
+            color: #00e5ff;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .code-block {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+            border-left: 4px solid #ff6b6b;
+        }
+        
+        .code-block pre {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .network-diagram {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 25px 0;
+            text-align: center;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+        
+        .diagram-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 15px 0;
+            gap: 20px;
+        }
+        
+        .diagram-node {
+            background: rgba(0, 229, 255, 0.2);
+            border: 2px solid #00e5ff;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .diagram-arrow {
+            font-size: 1.5rem;
+            color: #ff6b6b;
+        }
+        
+        .weight-matrix {
+            background: rgba(255, 107, 107, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .summary-box {
+            background: rgba(156, 39, 176, 0.1);
+            border: 1px solid rgba(156, 39, 176, 0.3);
+            border-radius: 10px;
+            padding: 25px;
+            margin: 25px 0;
+            text-align: center;
+        }
+        
+        .summary-title {
+            color: #9c27b0;
+            font-weight: bold;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+        
+        .interactive-box {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px dashed rgba(255, 107, 107, 0.5);
+            border-radius: 10px;
+            padding: 25px;
+            margin: 25px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .interactive-box:hover {
+            background: rgba(255, 107, 107, 0.15);
+        }
+        
+        .interactive-title {
+            color: #ff6b6b;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .hidden-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+        
+        .hidden-content.show {
+            max-height: 1000px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .slide {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .comparison-table {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-btn span {
+                display: none;
+            }
+            
+            .control-btn {
+                padding: 12px 15px;
+            }
+            
+            .diagram-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>From Q-Learning to Deep Q-Networks</h1>
+            <p class="subtitle">A complete tutorial with 2-state MDP examples, mathematical derivations, and runnable PyTorch code</p>
+            
+            <div class="presentation-controls">
+                <button class="control-btn" id="prev-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Previous</span>
+                </button>
+                
+                <div class="slide-counter">
+                    <span id="current-slide">1</span> / <span id="total-slides">25</span>
+                </div>
+                
+                <button class="control-btn" id="next-btn">
+                    <span>Next</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+                
+                <button class="control-btn" id="toggle-view">
+                    <i class="fas fa-expand"></i>
+                    <span>Toggle View</span>
+                </button>
+            </div>
+        </header>
+        
+        <div class="slides-container" id="slides-container">
+            <!-- Slide 1 -->
+            <div class="slide" id="slide1">
+                <div class="slide-header">
+                    <h2 class="slide-title">2-State Navigation MDP Example</h2>
+                    <div class="slide-number">1</div>
+                </div>
+                <div class="slide-content">
+                    <p>This is the <strong>smallest true MDP</strong> that shows:</p>
+                    <ul>
+                        <li><strong>Delayed reward</strong> - reward comes several steps after the action</li>
+                        <li><strong>Bootstrapping</strong> - using current estimates to update other estimates</li>
+                        <li><strong>Empirical convergence</strong> - learning stabilizes through experience</li>
+                    </ul>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-lightbulb"></i> Key Insight</h3>
+                        <p>We'll start with tabular Q-Learning, then extend to Deep Q-Networks (DQN) to show how the core concepts remain the same.</p>
+                    </div>
+                    
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">Model-Based Approach</div>
+                            <ul>
+                                <li>Knows transition probabilities</li>
+                                <li>Knows reward function</li>
+                                <li>Can compute optimal policy directly</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">Model-Free (Our Approach)</div>
+                            <ul>
+                                <li>Does NOT know transition probabilities</li>
+                                <li>Does NOT know reward function</li>
+                                <li>Learns purely from experience: (state, action, reward, next_state)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 2 -->
+            <div class="slide" id="slide2">
+                <div class="slide-header">
+                    <h2 class="slide-title">Environment Definition</h2>
+                    <div class="slide-number">2</div>
+                </div>
+                <div class="slide-content">
+                    <p>The agent does NOT know these rules — it must learn them through experience.</p>
+                    
+                    <h3>States</h3>
+                    <ul>
+                        <li>\( S_0 \) — Start state</li>
+                        <li>\( S_1 \) — Goal area</li>
+                    </ul>
+                    
+                    <h3>Actions (available in both states)</h3>
+                    <ul>
+                        <li><strong>Left</strong> (action 0)</li>
+                        <li><strong>Right</strong> (action 1)</li>
+                    </ul>
+                    
+                    <h3>True Environment Dynamics</h3>
+                    
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">From \( S_0 \) (Start)</div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Action</th>
+                                        <th>Next State</th>
+                                        <th>Reward</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Left</td>
+                                        <td>\( S_1 \)</td>
+                                        <td>0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Right</td>
+                                        <td>\( S_0 \)</td>
+                                        <td>-0.1</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p><em>Left moves to goal with no immediate reward</em></p>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">From \( S_1 \) (Goal Area)</div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Action</th>
+                                        <th>Next State</th>
+                                        <th>Reward</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Left</td>
+                                        <td>\( S_1 \)</td>
+                                        <td>-1</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Right</td>
+                                        <td>\( S_0 \)</td>
+                                        <td>+1</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p><em>Right returns to start with big reward</em></p>
+                        </div>
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-bullseye"></i> Optimal Strategy</h3>
+                        <p>The optimal policy is a cycle: \( S_0 \rightarrow \text{Left} \rightarrow S_1 \rightarrow \text{Right} \rightarrow S_0 \)</p>
+                        <p>This gives: 0 (first step) + 1 (second step) = 1 reward per 2-step cycle</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 3 -->
+            <div class="slide" id="slide3">
+                <div class="slide-header">
+                    <h2 class="slide-title">Q-Learning Setup</h2>
+                    <div class="slide-number">3</div>
+                </div>
+                <div class="slide-content">
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-cogs"></i> Algorithm Parameters</div>
+                        <ul>
+                            <li><strong>Algorithm:</strong> Q-Learning</li>
+                            <li><strong>Discount factor:</strong> \( \gamma = 0.9 \)</li>
+                            <li><strong>Learning rate:</strong> \( \alpha = 0.5 \)</li>
+                            <li><strong>Initial Q-values:</strong> all 0</li>
+                            <li><strong>Exploration:</strong> ε-greedy</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="formula large">
+                        \[ Q(s,a) \leftarrow Q(s,a) + \alpha \left[ r + \gamma \max_{a'} Q(s',a') - Q(s,a) \right] \]
+                    </div>
+                    
+                    <p>This is the <strong>tabular Q-Learning</strong> update rule. The Q-values are stored in a table:</p>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>State</th>
+                                <th>Left (action 0)</th>
+                                <th>Right (action 1)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>\( S_0 \)</td>
+                                <td>\( Q(S_0, \text{Left}) \)</td>
+                                <td>\( Q(S_0, \text{Right}) \)</td>
+                            </tr>
+                            <tr>
+                                <td>\( S_1 \)</td>
+                                <td>\( Q(S_1, \text{Left}) \)</td>
+                                <td>\( Q(S_1, \text{Right}) \)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-database"></i> Tabular Limitation</h3>
+                        <p>This works for small state spaces (2 states × 2 actions = 4 entries) but doesn't scale. With millions of states, we'd need a different approach.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 4 -->
+            <div class="slide" id="slide4">
+                <div class="slide-header">
+                    <h2 class="slide-title">First 3 Episodes (Fully Worked)</h2>
+                    <div class="slide-number">4</div>
+                </div>
+                <div class="slide-content">
+                    <div class="interactive-box" onclick="toggleContent('episode1')">
+                        <div class="interactive-title"><i class="fas fa-play-circle"></i> Episode 1</div>
+                        <p><strong>State:</strong> \( S_0 \) | <strong>Action:</strong> Left (exploring) | <strong>Result:</strong> Next state = \( S_1 \), Reward = 0</p>
+                        <div id="episode1" class="hidden-content">
+                            <div class="formula">
+                                \[ Q(S_0,\text{Left}) = 0 + 0.5(0 + 0.9 \times 0 - 0) = 0 \]
+                            </div>
+                            <p>✔️ No learning yet — future value unknown</p>
+                        </div>
+                    </div>
+                    
+                    <div class="interactive-box" onclick="toggleContent('episode2')">
+                        <div class="interactive-title"><i class="fas fa-play-circle"></i> Episode 2</div>
+                        <p><strong>State:</strong> \( S_1 \) | <strong>Action:</strong> Right (exploring) | <strong>Result:</strong> Next state = \( S_0 \), Reward = +1</p>
+                        <div id="episode2" class="hidden-content">
+                            <div class="formula">
+                                \[ Q(S_1,\text{Right}) = 0 + 0.5(1 + 0.9 \times 0 - 0) = 0.5 \]
+                            </div>
+                            <p>✔️ First strong signal appears</p>
+                        </div>
+                    </div>
+                    
+                    <div class="interactive-box" onclick="toggleContent('episode3')">
+                        <div class="interactive-title"><i class="fas fa-play-circle"></i> Episode 3</div>
+                        <p><strong>State:</strong> \( S_0 \) | <strong>Action:</strong> Left | <strong>Result:</strong> Next state = \( S_1 \), Reward = 0</p>
+                        <div id="episode3" class="hidden-content">
+                            <div class="formula">
+                                \[ Q(S_0,\text{Left}) = 0 + 0.5(0 + 0.9 \times 0.5 - 0) = 0.225 \]
+                            </div>
+                            <p>✔️ Delayed reward is now backing up from \( S_1 \rightarrow S_0 \)</p>
+                        </div>
+                    </div>
+                    
+                    <h3>Q-Table After 3 Episodes</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>State</th>
+                                <th>Left</th>
+                                <th>Right</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>\( S_0 \)</td>
+                                <td>0.225</td>
+                                <td>0</td>
+                            </tr>
+                            <tr>
+                                <td>\( S_1 \)</td>
+                                <td>0</td>
+                                <td>0.5</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="analogy">
+                        <h3><i class="fas fa-chart-line"></i> Learning Progress</h3>
+                        <p>Learning has started but values are still noisy. We need many more episodes to converge to the true values.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 5 -->
+            <div class="slide" id="slide5">
+                <div class="slide-header">
+                    <h2 class="slide-title">Empirical Convergence</h2>
+                    <div class="slide-number">5</div>
+                </div>
+                <div class="slide-content">
+                    <p>After hundreds of episodes with learning rate decay \( \alpha_t \downarrow 0 \), we observe:</p>
+                    
+                    <h3>1. Q-Values Stabilize</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>State</th>
+                                <th>Left</th>
+                                <th>Right</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>\( S_0 \)</td>
+                                <td>~0.81</td>
+                                <td>~0.20</td>
+                            </tr>
+                            <tr>
+                                <td>\( S_1 \)</td>
+                                <td>~-1.0</td>
+                                <td>~1.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p>Changes per update ≈ tiny</p>
+                    
+                    <h3>2. Policy No Longer Changes</h3>
+                    <div class="formula">
+                        \[ \text{Policy} = \arg\max_a Q(s,a) \]
+                    </div>
+                    <ul>
+                        <li>At \( S_0 \) → choose Left (0.81 > 0.20)</li>
+                        <li>At \( S_1 \) → choose Right (1.00 > -1.0)</li>
+                    </ul>
+                    
+                    <h3>3. Reward Curve Plateaus</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Phase</th>
+                                <th>Avg Reward</th>
+                                <th>Interpretation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Early</td>
+                                <td>noisy / negative</td>
+                                <td>Random exploration, many mistakes</td>
+                            </tr>
+                            <tr>
+                                <td>Middle</td>
+                                <td>rising</td>
+                                <td>Learning, improving policy</td>
+                            </tr>
+                            <tr>
+                                <td>Late</td>
+                                <td>flat at max (~0.5 per step)</td>
+                                <td>Learning saturated, optimal policy</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-flag-checkered"></i> Why This Is Called Empirical Convergence</h3>
+                        <p>We never know the true expectation exactly in model-free RL. Instead, we rely on observable signals:</p>
+                        <ul>
+                            <li>✔ Q-values stop changing significantly</li>
+                            <li>✔ Policy stops changing</li>
+                            <li>✔ Rewards stop improving</li>
+                        </ul>
+                        <p>That's <strong>empirical convergence</strong> — learning stabilizes based on experience, not theoretical calculation.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 6 -->
+            <div class="slide" id="slide6">
+                <div class="slide-header">
+                    <h2 class="slide-title">Mapping to Deep Q-Networks (DQN)</h2>
+                    <div class="slide-number">6</div>
+                </div>
+                <div class="slide-content">
+                    <p>Now we bridge classical RL to neural-network training. The core idea:</p>
+                    
+                    <div class="formula large">
+                        \[ Q(s,a) \longrightarrow Q_{\theta}(s,a) \]
+                    </div>
+                    
+                    <p>We replace the Q-table with a neural network parameterized by \( \theta \).</p>
+                    
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">Tabular Q-Learning</div>
+                            <ul>
+                                <li>Stores values in a table</li>
+                                <li>Simple, exact for small spaces</li>
+                                <li>Doesn't scale to large state spaces</li>
+                                <li>No generalization between similar states</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">Deep Q-Network (DQN)</div>
+                            <ul>
+                                <li>Approximates Q-function with neural network</li>
+                                <li>Scales to large state spaces</li>
+                                <li>Generalizes between similar states</li>
+                                <li>Same Bellman equation, different representation</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-exchange-alt"></i> What Changes, What Stays</h3>
+                        <p><strong>Changes:</strong> Representation (table → neural network), optimization (direct update → gradient descent)</p>
+                        <p><strong>Stays the Same:</strong> Bellman equation, TD error, expectation via samples, empirical convergence</p>
+                    </div>
+                    
+                    <div class="summary-box">
+                        <div class="summary-title">One-Sentence Summary</div>
+                        <p>Deep Q-Networks approximate the Q-function with a neural network and train it by minimizing the Bellman TD error using sampled experience.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 7 -->
+            <div class="slide" id="slide7">
+                <div class="slide-header">
+                    <h2 class="slide-title">Neural Network Architecture</h2>
+                    <div class="slide-number">7</div>
+                </div>
+                <div class="slide-content">
+                    <h3>State Encoding (One-Hot)</h3>
+                    <ul>
+                        <li>\( s_0 = [1, 0] \)</li>
+                        <li>\( s_1 = [0, 1] \)</li>
+                    </ul>
+                    
+                    <div class="network-diagram">
+                        <h3>Network Architecture for 2-State MDP</h3>
+                        
+                        <div class="diagram-row">
+                            <div class="diagram-node">Input<br>(2 units)</div>
+                            <div class="diagram-arrow">→</div>
+                            <div class="diagram-node">Hidden<br>(16 units)</div>
+                            <div class="diagram-arrow">→</div>
+                            <div class="diagram-node">Output<br>(2 units)</div>
+                        </div>
+                        
+                        <div class="weight-matrix">
+                            <p><strong>Input → Hidden weights:</strong> \( W_1 \in \mathbb{R}^{2 \times 16} \)</p>
+                            <p><strong>Hidden → Output weights:</strong> \( W_2 \in \mathbb{R}^{16 \times 2} \)</p>
+                        </div>
+                        
+                        <p><strong>Activation:</strong> ReLU for hidden layer, linear for output</p>
+                        
+                        <p><strong>Output interpretation:</strong></p>
+                        <ul>
+                            <li>Index 0 → \( Q(s, \text{Left}) \)</li>
+                            <li>Index 1 → \( Q(s, \text{Right}) \)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-code"></i> Forward Pass Example</div>
+                        <p>Input: \( s_0 = [1, 0] \) → Network → Output: \( [0.22, 0.05] \)</p>
+                        <p><strong>Interpretation:</strong></p>
+                        <ul>
+                            <li>\( Q(s_0, \text{Left}) \approx 0.22 \)</li>
+                            <li>\( Q(s_0, \text{Right}) \approx 0.05 \)</li>
+                        </ul>
+                        <p>Action selection: \( a = \arg\max Q_{\theta}(s,a) = \text{Left} \) (since 0.22 > 0.05)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 8 -->
+            <div class="slide" id="slide8">
+                <div class="slide-header">
+                    <h2 class="slide-title">From Transition to Training Sample</h2>
+                    <div class="slide-number">8</div>
+                </div>
+                <div class="slide-content">
+                    <p>From interaction with the environment, we collect transitions:</p>
+                    
+                    <div class="formula large">
+                        \[ (s, a, r, s') \]
+                    </div>
+                    
+                    <p>Example: \( (s_0, \text{Left}, 0, s_1) \)</p>
+                    
+                    <p>This becomes a <strong>supervised training sample</strong> for our neural network.</p>
+                    
+                    <h3>DQN Target (Bellman Target)</h3>
+                    <div class="formula">
+                        \[ y = r + \gamma \max_{a'} Q_{\theta^-}(s', a') \]
+                    </div>
+                    
+                    <p>Where \( \theta^- \) are the target network parameters (stabilizes training).</p>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-bullseye"></i> Conceptual Meaning</h3>
+                        <p>"What \( Q(s,a) \) should be, according to Bellman optimality."</p>
+                        <p>The target network \( Q_{\theta^-} \) is a periodically updated copy of the main network to prevent training instability.</p>
+                    </div>
+                    
+                    <h3>Loss Function (Key Mapping)</h3>
+                    <div class="formula large">
+                        \[ \mathcal{L}(\theta) = \left( y - Q_{\theta}(s,a) \right)^2 \]
+                    </div>
+                    
+                    <p>This is exactly the <strong>TD error squared</strong>.</p>
+                    
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">Tabular Q-Learning</div>
+                            <p>Update \( Q(s,a) \) directly with:</p>
+                            <div class="formula">
+                                \[ Q \leftarrow Q + \alpha \delta \]
+                            </div>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">DQN</div>
+                            <p>Update \( \theta \) via gradient descent:</p>
+                            <div class="formula">
+                                \[ \theta \leftarrow \theta - \alpha \nabla_{\theta} \mathcal{L} \]
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p>✔ Same learning signal (TD error), different machinery</p>
+                </div>
+            </div>
+            
+            <!-- Slide 9 -->
+            <div class="slide" id="slide9">
+                <div class="slide-header">
+                    <h2 class="slide-title">Experience Replay</h2>
+                    <div class="slide-number">9</div>
+                </div>
+                <div class="slide-content">
+                    <div class="key-insight">
+                        <h3><i class="fas fa-history"></i> What Is Experience Replay?</h3>
+                        <p>Experience replay stores past transitions and trains the network on randomly sampled batches instead of the latest step only.</p>
+                    </div>
+                    
+                    <h3>Why Experience Replay?</h3>
+                    <ul>
+                        <li><strong>Breaks correlation:</strong> Sequential experiences are correlated; random sampling decorrelates them</li>
+                        <li><strong>Improves stability:</strong> Averages over many experiences instead of reacting to each new one</li>
+                        <li><strong>Approximates expectation:</strong> Random sampling approximates the expectation in Bellman equation</li>
+                        <li><strong>Reuses experiences:</strong> Each transition can be learned from multiple times</li>
+                    </ul>
+                    
+                    <h3>Replay Buffer Structure</h3>
+                    <div class="code-block">
+                        <pre><code class="language-python">
+# Each experience is a tuple:
+# (state, action, reward, next_state, done)
+
+# Example buffer after a few steps:
+# Index | State | Action | Reward | Next State | Done
+# ------|-------|--------|--------|------------|-----
+#   1   |  s₀   |  Left  |   0    |     s₁     | False
+#   2   |  s₁   |  Right |   +1   |     s₀     | False
+#   3   |  s₀   |  Right |   0    |     s₀     | False
+#   4   |  s₁   |  Left  |   -1   |     s₁     | True
+                        </code></pre>
+                    </div>
+                    
+                    <h3>Mini-Batch Sampling</h3>
+                    <p>Instead of using only the latest transition, DQN samples randomly from the buffer:</p>
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-random"></i> Example Mini-Batch (size = 2)</div>
+                        <ul>
+                            <li>\( (s_0, \text{Left}, 0, s_1) \)</li>
+                            <li>\( (s_1, \text{Right}, +1, s_0) \)</li>
+                        </ul>
+                        <p>This is where <strong>expectation ≈ empirical average</strong> happens.</p>
+                    </div>
+                    
+                    <div class="analogy">
+                        <h3><i class="fas fa-graduation-cap"></i> Analogy</h3>
+                        <p>Instead of learning only from your most recent experience, you learn from a random sample of all your past experiences. This gives a more balanced, less biased view of what works.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 10 -->
+            <div class="slide" id="slide10">
+                <div class="slide-header">
+                    <h2 class="slide-title">Loss Calculation with Replay</h2>
+                    <div class="slide-number">10</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Forward Pass: Predict \( Q(s,a) \)</h3>
+                    
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">Sample 1: \( s_0 \), Left</div>
+                            <div class="formula">
+                                \[ Q(s_0) = [0.20, 0.05] \]
+                            </div>
+                            <p>Chosen action: Left</p>
+                            <div class="formula">
+                                \[ Q(s_0, \text{Left}) = 0.20 \]
+                            </div>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">Sample 2: \( s_1 \), Right</div>
+                            <div class="formula">
+                                \[ Q(s_1) = [-0.10, 0.30] \]
+                            </div>
+                            <p>Chosen action: Right</p>
+                            <div class="formula">
+                                \[ Q(s_1, \text{Right}) = 0.30 \]
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3>Target Calculation (Bellman Target)</h3>
+                    
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">Sample 1</div>
+                            <p>Assume \( \max Q(s_1) = 0.40 \)</p>
+                            <div class="formula">
+                                \[ y_1 = 0 + 0.9 \times 0.40 = 0.36 \]
+                            </div>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">Sample 2</div>
+                            <p>Assume \( \max Q(s_0) = 0.20 \)</p>
+                            <div class="formula">
+                                \[ y_2 = 1 + 0.9 \times 0.20 = 1.18 \]
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3>DQN Loss (Mean Squared TD Error)</h3>
+                    <div class="formula large">
+                        \[ \mathcal{L}(\theta) = \frac{1}{N} \sum_{i=1}^{N} \left( y_i - Q_{\theta}(s_i, a_i) \right)^2 \]
+                    </div>
+                    
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-calculator"></i> Plug in Numbers</div>
+                        <div class="formula">
+                            \[ \mathcal{L} = \frac{1}{2} \left[ (0.36 - 0.20)^2 + (1.18 - 0.30)^2 \right] \]
+                        </div>
+                        <div class="formula">
+                            \[ \mathcal{L} = \frac{1}{2} (0.0256 + 0.7744) = 0.40 \]
+                        </div>
+                        <p>✔ This scalar loss is what backpropagates through the network</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 11 -->
+            <div class="slide" id="slide11">
+                <div class="slide-header">
+                    <h2 class="slide-title">Gradient Calculation and Weight Update</h2>
+                    <div class="slide-number">11</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Key Conceptual Shift</h3>
+                    
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">Tabular Q-Learning</div>
+                            <div class="formula">
+                                \[ Q(s,a) \leftarrow Q(s,a) + \alpha \delta \]
+                            </div>
+                            <p>Update a number in a table</p>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">DQN (Function Approximation)</div>
+                            <div class="formula">
+                                \[ \theta \leftarrow \theta - \alpha \nabla_{\theta} \mathcal{L} \]
+                            </div>
+                            <p>Update neural network weights via gradient descent</p>
+                        </div>
+                    </div>
+                    
+                    <p>✔ Same idea, different object</p>
+                    
+                    <h3>Gradient of the Loss (Core Math)</h3>
+                    <p>For one sample:</p>
+                    <div class="formula">
+                        \[ \frac{\partial \mathcal{L}_i}{\partial Q} = -2(y_i - Q_{\theta}) \]
+                    </div>
+                    
+                    <p>Apply chain rule:</p>
+                    <div class="formula">
+                        \[ \nabla_{\theta} \mathcal{L}_i = -2(y_i - Q_{\theta}) \nabla_{\theta} Q_{\theta}(s_i, a_i) \]
+                    </div>
+                    
+                    <p>This is the neural-network version of the TD error.</p>
+                    
+                    <h3>Plug in Numbers (Concrete)</h3>
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">Sample 1</div>
+                            <div class="formula">
+                                \[ \delta_1 = 0.36 - 0.20 = 0.16 \]
+                            </div>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">Sample 2</div>
+                            <div class="formula">
+                                \[ \delta_2 = 1.18 - 0.30 = 0.88 \]
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3>Average the Gradients (Replay Buffer Effect)</h3>
+                    <div class="formula">
+                        \[ \nabla_{\theta} \mathcal{L} = -(\delta_1 \nabla_{\theta} Q_1 + \delta_2 \nabla_{\theta} Q_2) \]
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-balance-scale"></i> Replay Buffer = Empirical Expectation</h3>
+                        <p>The replay buffer approximates the expectation by averaging gradients from multiple samples.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 12 -->
+            <div class="slide" id="slide12">
+                <div class="slide-header">
+                    <h2 class="slide-title">Weight Update Rule</h2>
+                    <div class="slide-number">12</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Final Weight Update</h3>
+                    <div class="formula large">
+                        \[ \theta \leftarrow \theta - \alpha \left( \delta_1 \nabla_{\theta} Q_1 + \delta_2 \nabla_{\theta} Q_2 \right) \]
+                    </div>
+                    
+                    <p>Using learning rate \( \alpha = 0.1 \).</p>
+                    
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">Tabular Q-Learning</div>
+                            <ul>
+                                <li>\( \delta = y - Q \) (same)</li>
+                                <li>Update scalar value</li>
+                                <li>One state-action pair</li>
+                                <li>Exact update</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">DQN</div>
+                            <ul>
+                                <li>\( \delta = y - Q \) (same)</li>
+                                <li>Update neural network weights</li>
+                                <li>Many parameters (weights)</li>
+                                <li>Approximate update via gradients</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-lightbulb"></i> Intuition (Key Insight)</h3>
+                        <p>Each sample says: "If this state-action pair happens again, increase the network output in this direction."</p>
+                        <p>Replay buffer averages many such directions, stabilizes updates, and approximates expectation.</p>
+                    </div>
+                    
+                    <h3>Why the Loss Value (0.40) Matters — and Why It Doesn't</h3>
+                    <ul>
+                        <li>✕ You do not update using 0.40 directly</li>
+                        <li>✔ You update using its gradient</li>
+                    </ul>
+                    
+                    <div class="analogy">
+                        <h3><i class="fas fa-car"></i> Analogy</h3>
+                        <p><strong>Loss value = Speedometer reading</strong> (tells you how fast you're going, but doesn't control the car)</p>
+                        <p><strong>Gradient = Steering wheel and pedals</strong> (actually controls the direction and speed of learning)</p>
+                    </div>
+                    
+                    <div class="summary-box">
+                        <div class="summary-title">One-Sentence Summary</div>
+                        <p>In DQN, the loss value itself is not used for learning; its gradient propagates TD errors through the network, updating weights exactly like Q-learning updates values.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 13 -->
+            <div class="slide" id="slide13">
+                <div class="slide-header">
+                    <h2 class="slide-title">Concrete Weight Update Example</h2>
+                    <div class="slide-number">13</div>
+                </div>
+                <div class="slide-content">
+                    <p>Let's examine ONE concrete weight update with numbers.</p>
+                    
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-sort-numeric-down"></i> Focus on One Sample</div>
+                        <p>\( (s_0, \text{Left}, r=0, s_1) \)</p>
+                        <ul>
+                            <li>Target: \( y = 0.36 \)</li>
+                            <li>Predicted: \( Q(s_0, \text{Left}) = 0.20 \)</li>
+                            <li>TD error: \( \delta = y - Q = 0.16 \)</li>
+                        </ul>
+                    </div>
+                    
+                    <h3>Network (Simplified)</h3>
+                    <div class="network-diagram">
+                        <div class="diagram-row">
+                            <div class="diagram-node">Input<br>(2)</div>
+                            <div class="diagram-arrow">→</div>
+                            <div class="diagram-node">Hidden<br>(2, ReLU)</div>
+                            <div class="diagram-arrow">→</div>
+                            <div class="diagram-node">Output<br>(2)</div>
+                        </div>
+                    </div>
+                    
+                    <h3>Step 1: Forward Values</h3>
+                    <div class="code-block">
+                        <pre>
+Input: x = [1, 0]
+Hidden pre-activation: z = [0.10, -0.10]
+Hidden activation (ReLU): h = [0.10, 0]
+Output weight for Left action: W^(Left) = [0.20, -0.05]
+Predicted Q: Q = 0.10 × 0.20 + 0 × (-0.05) = 0.02
+                        </pre>
+                    </div>
+                    
+                    <h3>Step 2: Loss Gradient w.r.t Output</h3>
+                    <div class="formula">
+                        \[ \frac{\partial \mathcal{L}}{\partial Q} = -2(y - Q) = -2(0.36 - 0.02) = -0.68 \]
+                    </div>
+                    
+                    <h3>Step 3: Gradient w.r.t Output Weights</h3>
+                    <p>For weight connecting hidden unit 1 → Left output:</p>
+                    <div class="formula">
+                        \[ \frac{\partial Q}{\partial w_1} = h_1 = 0.10 \]
+                    </div>
+                    <div class="formula">
+                        \[ \frac{\partial \mathcal{L}}{\partial w_1} = -0.68 \times 0.10 = -0.068 \]
+                    </div>
+                    
+                    <h3>Step 4: Weight Update (Gradient Descent)</h3>
+                    <p>Learning rate: \( \alpha = 0.1 \)</p>
+                    <div class="formula">
+                        \[ w_1 \leftarrow 0.20 - 0.1(-0.068) = 0.2068 \]
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-chart-line-up"></i> What Just Happened?</h3>
+                        <p>"When this hidden neuron is active in state \( s_0 \), increase the value of action Left."</p>
+                        <p>This is <strong>exactly the same logic as tabular Q-learning</strong>, just distributed across weights.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 14 -->
+            <div class="slide" id="slide14">
+                <div class="slide-header">
+                    <h2 class="slide-title">Gradient Flow Through the Network</h2>
+                    <div class="slide-number">14</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Text Diagram of Gradient Flow</h3>
+                    
+                    <div class="network-diagram">
+                        <h4>Gradient Flow from Loss Back to Inputs</h4>
+                        
+                        <div class="diagram-row">
+                            <div class="diagram-node" style="background: rgba(255, 107, 107, 0.3);">Loss</div>
+                            <div class="diagram-arrow">↓</div>
+                            <div>\( \partial\mathcal{L}/\partial Q = -2(y - Q) \)</div>
+                        </div>
+                        
+                        <div class="diagram-row">
+                            <div class="diagram-arrow">↓</div>
+                            <div class="diagram-node">Output neuron<br>(Left only)</div>
+                            <div class="diagram-arrow">↓</div>
+                            <div>multiplied by hidden activation</div>
+                        </div>
+                        
+                        <div class="diagram-row">
+                            <div class="diagram-arrow">↓</div>
+                            <div class="diagram-node">Hidden neuron 1<br>(active)</div>
+                            <div class="diagram-arrow">↓</div>
+                            <div>multiplied by ReLU'(z)</div>
+                        </div>
+                        
+                        <div class="diagram-row">
+                            <div class="diagram-arrow">↓</div>
+                            <div class="diagram-node">Input neuron \( s_0 \)</div>
+                        </div>
+                    </div>
+                    
+                    <h3>Expanded View</h3>
+                    <div class="code-block">
+                        <pre>
+(y - Q)
+    ↓
+Q(s₀, Left)
+    ↓
+Output weight (Hidden → Left)
+    ↓
+Hidden activation h₁
+    ↓
+ReLU gate (on/off)
+    ↓
+Input weight (s₀ → Hidden₁)
+                        </pre>
+                    </div>
+                    
+                    <h3>Important Notes</h3>
+                    <ul>
+                        <li>Only the selected action's output neuron gets gradients</li>
+                        <li>ReLU blocks gradients if activation = 0 (dead neurons)</li>
+                        <li>Replay batch averages many such gradient flows</li>
+                    </ul>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-project-diagram"></i> How This Matches Q-Learning Exactly</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tabular Q-learning</th>
+                                    <th>DQN</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Update Q(s,a)</td>
+                                    <td>Update weights affecting Q(s,a)</td>
+                                </tr>
+                                <tr>
+                                    <td>TD error δ</td>
+                                    <td>Same δ</td>
+                                </tr>
+                                <tr>
+                                    <td>Scalar update</td>
+                                    <td>Vector update</td>
+                                </tr>
+                                <tr>
+                                    <td>Exact</td>
+                                    <td>Approximate</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 15 -->
+            <div class="slide" id="slide15">
+                <div class="slide-header">
+                    <h2 class="slide-title">When Training Converges</h2>
+                    <div class="slide-number">15</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Training Convergence Criteria</h3>
+                    <p>Training converges when:</p>
+                    <ol>
+                        <li><strong>TD errors → small</strong> (predictions match targets)</li>
+                        <li><strong>Weight updates → tiny</strong> (gradients are near zero)</li>
+                        <li><strong>Gradient directions cancel out</strong> across samples</li>
+                        <li><strong>Q-values stop changing</strong> meaningfully</li>
+                    </ol>
+                    
+                    <div class="formula">
+                        \[ \nabla_{\theta} \mathcal{L} \approx 0 \]
+                    </div>
+                    
+                    <h3>Empirical Convergence Signals</h3>
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">During Training</div>
+                            <ul>
+                                <li>Loss plateaus (stops decreasing)</li>
+                                <li>TD error variance decreases</li>
+                                <li>Weight changes become very small</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">In Performance</div>
+                            <ul>
+                                <li>Policy stops changing</li>
+                                <li>Rewards stabilize at maximum</li>
+                                <li>Agent behavior becomes consistent</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <h3>TD Error Over Time</h3>
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-chart-line"></i> Typical Progression</div>
+                        <p>0.25 → 0.09 → 0.02 → 0.005 → ...</p>
+                        <p>Errors get smaller as predictions improve</p>
+                    </div>
+                    
+                    <h3>Why This Means "Expectation Is Reached"</h3>
+                    <ul>
+                        <li>Each update is a <strong>sample-based estimate</strong></li>
+                        <li>Gradient descent averages many samples</li>
+                        <li>Learning rate decays over time</li>
+                        <li>Noise cancels out in the long run</li>
+                    </ul>
+                    
+                    <div class="formula">
+                        \[ Q_{\theta}(s,a) \approx \mathbb{E}[r + \gamma \max Q(s',a')] \]
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-check-circle"></i> Final Intuition</h3>
+                        <p><strong>Forward pass = predict value</strong><br>
+                        <strong>Backward pass = correct prediction</strong><br>
+                        <strong>Convergence = predictions stop needing correction</strong></p>
+                    </div>
+                    
+                    <div class="summary-box">
+                        <div class="summary-title">One-Sentence Summary</div>
+                        <p>DQN converges when repeated forward-backward updates drive TD error toward zero, causing Q-values, policy, and rewards to stabilize under continued experience.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 16 -->
+            <div class="slide" id="slide16">
+                <div class="slide-header">
+                    <h2 class="slide-title">Complete PyTorch DQN Implementation</h2>
+                    <div class="slide-number">16</div>
+                </div>
+                <div class="slide-content">
+                    <p>Below is <strong>actual, runnable PyTorch DQN code</strong> for our exact 2-state MDP:</p>
+                    
+                    <div class="code-block">
+                        <pre><code class="language-python">
+import random
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from collections import deque
+
+# 1) Simple MDP Environment
+class SimpleMDP:
+    def __init__(self):
+        self.state = 0  # 0 or 1
+    
+    def reset(self):
+        self.state = 0
+        return self.state
+    
+    def step(self, action):
+        if self.state == 0:
+            if action == 0:    # Left
+                next_state, reward = 1, 0
+            else:              # Right
+                next_state, reward = 0, 0
+        else:
+            if action == 0:    # Left
+                next_state, reward = 1, -1
+            else:              # Right
+                next_state, reward = 0, 1
+        
+        self.state = next_state
+        done = False
+        return next_state, reward, done
+
+# 2) Q-Network (2 → 16 → 2)
+class DQN(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(2, 16),
+            nn.ReLU(),
+            nn.Linear(16, 2)
+        )
+    
+    def forward(self, x):
+        return self.net(x)
+
+# 3) Experience Replay Buffer
+class ReplayBuffer:
+    def __init__(self, capacity=1000):
+        self.buffer = deque(maxlen=capacity)
+    
+    def push(self, s, a, r, s_next):
+        self.buffer.append((s, a, r, s_next))
+    
+    def sample(self, batch_size):
+        return random.sample(self.buffer, batch_size)
+    
+    def __len__(self):
+        return len(self.buffer)
+
+# 4) Helper: One-Hot State Encoding
+def one_hot(state):
+    v = torch.zeros(2)
+    v[state] = 1.0
+    return v
+
+# 5) Training Setup
+env = SimpleMDP()
+q_net = DQN()
+target_net = DQN()
+target_net.load_state_dict(q_net.state_dict())
+optimizer = optim.Adam(q_net.parameters(), lr=0.01)
+buffer = ReplayBuffer()
+gamma = 0.9
+epsilon = 0.2
+batch_size = 4
+                        </code></pre>
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-code"></i> Code Structure</h3>
+                        <ol>
+                            <li><strong>SimpleMDP</strong>: Implements our 2-state environment</li>
+                            <li><strong>DQN</strong>: Neural network (2 → 16 → 2)</li>
+                            <li><strong>ReplayBuffer</strong>: Stores experiences for sampling</li>
+                            <li><strong>one_hot</strong>: Converts states to one-hot vectors</li>
+                            <li><strong>Training setup</strong>: Networks, optimizer, hyperparameters</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 17 -->
+            <div class="slide" id="slide17">
+                <div class="slide-header">
+                    <h2 class="slide-title">Training Loop (Actual DQN)</h2>
+                    <div class="slide-number">17</div>
+                </div>
+                <div class="slide-content">
+                    <div class="code-block">
+                        <pre><code class="language-python">
+# Training Loop (Actual DQN)
+for episode in range(200):
+    state = env.reset()
+    
+    for step in range(10):
+        # ε-greedy action selection
+        if random.random() < epsilon:
+            action = random.randint(0, 1)
+        else:
+            with torch.no_grad():
+                q_vals = q_net(one_hot(state))
+                action = q_vals.argmax().item()
+        
+        # Take action, get next state and reward
+        next_state, reward, _ = env.step(action)
+        
+        # Store transition in replay buffer
+        buffer.push(state, action, reward, next_state)
+        
+        state = next_state
+        
+        # --- EXPERIENCE REPLAY UPDATE ---
+        if len(buffer) >= batch_size:
+            batch = buffer.sample(batch_size)
+            states, actions, rewards, next_states = zip(*batch)
+            
+            # Convert to tensors
+            states = torch.stack([one_hot(s) for s in states])
+            next_states = torch.stack([one_hot(s) for s in next_states])
+            actions = torch.tensor(actions)
+            rewards = torch.tensor(rewards, dtype=torch.float)
+            
+            # Q(s,a) from current network
+            q_values = q_net(states)
+            q_sa = q_values.gather(1, actions.unsqueeze(1)).squeeze()
+            
+            # Bellman target (using target network)
+            with torch.no_grad():
+                max_q_next = target_net(next_states).max(1)[0]
+                targets = rewards + gamma * max_q_next
+            
+            # Loss (Mean Squared TD Error)
+            loss = nn.MSELoss()(q_sa, targets)
+            
+            # Backpropagation
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+        
+        # Update target network (every 20 episodes)
+        if episode % 20 == 0:
+            target_net.load_state_dict(q_net.state_dict())
+        
+        # Print progress (every 50 episodes)
+        if episode % 50 == 0:
+            print(f"Episode {episode}, Loss: {loss.item():.4f}")
+                        </code></pre>
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-sync-alt"></i> Training Loop Breakdown</h3>
+                        <ol>
+                            <li><strong>Action selection</strong>: ε-greedy exploration</li>
+                            <li><strong>Experience collection</strong>: Store (s,a,r,s') in buffer</li>
+                            <li><strong>Experience replay</strong>: Sample batch from buffer</li>
+                            <li><strong>Target calculation</strong>: \( r + \gamma \max Q(s') \)</li>
+                            <li><strong>Loss computation</strong>: MSE between target and prediction</li>
+                            <li><strong>Backpropagation</strong>: Update network weights</li>
+                            <li><strong>Target network update</strong>: Periodic sync for stability</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 18 -->
+            <div class="slide" id="slide18">
+                <div class="slide-header">
+                    <h2 class="slide-title">Theory-to-Code Mapping</h2>
+                    <div class="slide-number">18</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Exact Mapping Between Theory and Code</h3>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Theory / Concept</th>
+                                <th>Code Implementation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>TD target: \( r + \gamma \max Q(s') \)</td>
+                                <td><code>targets = rewards + gamma * max_q_next</code></td>
+                            </tr>
+                            <tr>
+                                <td>TD error: \( y - Q(s,a) \)</td>
+                                <td><code>loss = nn.MSELoss()(q_sa, targets)</code></td>
+                            </tr>
+                            <tr>
+                                <td>Loss function: \( (y - Q)^2 \)</td>
+                                <td><code>nn.MSELoss()</code></td>
+                            </tr>
+                            <tr>
+                                <td>Gradient descent</td>
+                                <td><code>loss.backward()</code> + <code>optimizer.step()</code></td>
+                            </tr>
+                            <tr>
+                                <td>Replay buffer</td>
+                                <td><code>ReplayBuffer</code> class with <code>sample()</code></td>
+                            </tr>
+                            <tr>
+                                <td>Target network</td>
+                                <td><code>target_net.load_state_dict(q_net.state_dict())</code></td>
+                            </tr>
+                            <tr>
+                                <td>ε-greedy exploration</td>
+                                <td><code>if random.random() < epsilon:</code></td>
+                            </tr>
+                            <tr>
+                                <td>State encoding</td>
+                                <td><code>one_hot()</code> function</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h3>Checking Convergence</h3>
+                    <div class="code-block">
+                        <pre><code class="language-python">
+# After training, check the learned Q-values
+with torch.no_grad():
+    print("Q(s0):", q_net(one_hot(0)))
+    print("Q(s1):", q_net(one_hot(1)))
+                        </code></pre>
+                    </div>
+                    
+                    <p>You should see:</p>
+                    <ul>
+                        <li>From \( s_0 \): Right action value > Left action value</li>
+                        <li>From \( s_1 \): Right action value > Left action value</li>
+                        <li>Policy stops changing (converged)</li>
+                        <li>Loss plateaus (near zero)</li>
+                    </ul>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-brain"></i> Final Mental Model</h3>
+                        <p><strong>DQN turns Bellman updates into supervised learning</strong>, where replay samples generate regression targets and backpropagation replaces table updates.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 19 -->
+            <div class="slide" id="slide19">
+                <div class="slide-header">
+                    <h2 class="slide-title">Visualizing the Learning Process</h2>
+                    <div class="slide-number">19</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Three Phases of DQN Training</h3>
+                    
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">1. Early Phase (Exploration)</div>
+                            <ul>
+                                <li>High ε (exploration rate)</li>
+                                <li>Large TD errors</li>
+                                <li>Q-values change rapidly</li>
+                                <li>Rewards are noisy/negative</li>
+                                <li>Network learns basic patterns</li>
+                            </ul>
+                            <div class="analogy">
+                                <p><i class="fas fa-compass"></i> <strong>Analogy:</strong> Randomly exploring a new city</p>
+                            </div>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">2. Middle Phase (Learning)</div>
+                            <ul>
+                                <li>ε decays gradually</li>
+                                <li>TD errors decrease</li>
+                                <li>Q-values converge toward optimal</li>
+                                <li>Rewards increase steadily</li>
+                                <li>Policy improves consistently</li>
+                            </ul>
+                            <div class="analogy">
+                                <p><i class="fas fa-chart-line"></i> <strong>Analogy:</strong> Learning the best routes in the city</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">3. Late Phase (Convergence)</div>
+                            <ul>
+                                <li>Low ε (mostly exploitation)</li>
+                                <li>TD errors near zero</li>
+                                <li>Q-values stabilize</li>
+                                <li>Rewards plateau at maximum</li>
+                                <li>Policy becomes optimal</li>
+                            </ul>
+                            <div class="analogy">
+                                <p><i class="fas fa-flag-checkered"></i> <strong>Analogy:</strong> Efficiently navigating the city using known best routes</p>
+                            </div>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">Convergence Signals</div>
+                            <ul>
+                                <li>Loss stops decreasing</li>
+                                <li>Policy stops changing</li>
+                                <li>Reward curve flattens</li>
+                                <li>Q-value changes are tiny</li>
+                                <li>Gradient norms are small</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <h3>What Success Looks Like</h3>
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-check-circle"></i> Successful Training</div>
+                        <p>After training, running the code should show:</p>
+                        <div class="code-block">
+                            <pre>
+Q(s0): tensor([0.81, 0.20])  # Left: 0.81, Right: 0.20 → Choose Left
+Q(s1): tensor([-1.00, 1.00]) # Left: -1.00, Right: 1.00 → Choose Right
+                            </pre>
+                        </div>
+                        <p>The agent learns the optimal policy: \( S_0 \rightarrow \text{Left} \rightarrow S_1 \rightarrow \text{Right} \rightarrow S_0 \)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 20 -->
+            <div class="slide" id="slide20">
+                <div class="slide-header">
+                    <h2 class="slide-title">Key Differences: Tabular vs DQN</h2>
+                    <div class="slide-number">20</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Comparison Table</h3>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Aspect</th>
+                                <th>Tabular Q-Learning</th>
+                                <th>Deep Q-Network (DQN)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Representation</strong></td>
+                                <td>Table (state × action)</td>
+                                <td>Neural network with weights θ</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Update Rule</strong></td>
+                                <td>\( Q(s,a) \leftarrow Q(s,a) + \alpha \delta \)</td>
+                                <td>\( \theta \leftarrow \theta - \alpha \nabla_{\theta} \mathcal{L} \)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Scalability</strong></td>
+                                <td>Only small state spaces</td>
+                                <td>Scales to large/continuous spaces</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Generalization</strong></td>
+                                <td>None (each state independent)</td>
+                                <td>Yes (similar states have similar Q-values)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Memory Usage</strong></td>
+                                <td>O(|S| × |A|) (grows with states)</td>
+                                <td>O(parameters) (fixed size network)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Convergence</strong></td>
+                                <td>Guaranteed (under conditions)</td>
+                                <td>Empirical (may need tuning)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Hyperparameters</strong></td>
+                                <td>α (learning rate), γ (discount)</td>
+                                <td>+ network architecture, batch size, replay buffer size</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Sample Efficiency</strong></td>
+                                <td>Low (each sample used once)</td>
+                                <td>High (replay buffer reuses samples)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-exchange-alt"></i> What's the Same?</h3>
+                        <p>Despite different implementations, both share the same core concepts:</p>
+                        <ol>
+                            <li><strong>Bellman equation</strong> as the foundation</li>
+                            <li><strong>Temporal Difference (TD) error</strong> as the learning signal</li>
+                            <li><strong>Model-free learning</strong> from experience</li>
+                            <li><strong>Empirical convergence</strong> criteria (Q-values stabilize, policy stops changing)</li>
+                            <li><strong>Exploration-exploitation tradeoff</strong> (ε-greedy)</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="analogy">
+                        <h3><i class="fas fa-road"></i> Analogy</h3>
+                        <p><strong>Tabular Q-Learning</strong> is like memorizing specific routes in a small town.</p>
+                        <p><strong>DQN</strong> is like learning general navigation principles that work in any city.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 21 -->
+            <div class="slide" id="slide21">
+                <div class="slide-header">
+                    <h2 class="slide-title">Common Challenges & Solutions</h2>
+                    <div class="slide-number">21</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Challenges in DQN Training</h3>
+                    
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">Challenge</div>
+                            <ul>
+                                <li><strong>Non-stationary targets</strong>: Q-values change while we're learning them</li>
+                                <li><strong>Correlated samples</strong>: Sequential experiences are highly correlated</li>
+                                <li><strong>Overestimation bias</strong>: max operator can overestimate Q-values</li>
+                                <li><strong>Catastrophic forgetting</strong>: New experiences overwrite old knowledge</li>
+                                <li><strong>Unstable gradients</strong>: Large TD errors cause training instability</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">Solution in DQN</div>
+                            <ul>
+                                <li><strong>Target network</strong>: Fixed target Q-network updated periodically</li>
+                                <li><strong>Experience replay</strong>: Random sampling breaks correlations</li>
+                                <li><strong>Double DQN</strong>: Uses two networks to reduce overestimation</li>
+                                <li><strong>Replay buffer</strong>: Preserves old experiences for repeated learning</li>
+                                <li><strong>Gradient clipping</strong>: Limits gradient magnitude for stability</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <h3>Hyperparameter Tuning Tips</h3>
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-sliders-h"></i> Key Hyperparameters</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Typical Value</th>
+                                    <th>Effect</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Learning rate (α)</td>
+                                    <td>0.0001 - 0.01</td>
+                                    <td>Too high: unstable, Too low: slow learning</td>
+                                </tr>
+                                <tr>
+                                    <td>Discount factor (γ)</td>
+                                    <td>0.9 - 0.99</td>
+                                    <td>How much to value future rewards</td>
+                                </tr>
+                                <tr>
+                                    <td>Replay buffer size</td>
+                                    <td>10,000 - 1,000,000</td>
+                                    <td>More diversity but slower sampling</td>
+                                </tr>
+                                <tr>
+                                    <td>Batch size</td>
+                                    <td>32 - 256</td>
+                                    <td>Larger: stable but slower updates</td>
+                                </tr>
+                                <tr>
+                                    <td>Target update freq.</td>
+                                    <td>Every 100-1000 steps</td>
+                                    <td>More frequent: unstable, Less: slow learning</td>
+                                </tr>
+                                <tr>
+                                    <td>ε decay</td>
+                                    <td>1.0 → 0.01 over time</td>
+                                    <td>Balance exploration vs exploitation</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Debugging Tips</h3>
+                        <ol>
+                            <li><strong>Monitor loss</strong>: Should decrease then plateau (not increase)</li>
+                            <li><strong>Check Q-values</strong>: Should be reasonable (not NaN or extreme)</li>
+                            <li><strong>Watch reward</strong>: Should increase over time</li>
+                            <li><strong>Visualize policy</strong>: Agent behavior should improve</li>
+                            <li><strong>Try simpler problems</strong>: Debug on small MDPs first</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 22 -->
+            <div class="slide" id="slide22">
+                <div class="slide-header">
+                    <h2 class="slide-title">Beyond Basic DQN</h2>
+                    <div class="slide-number">22</div>
+                </div>
+                <div class="slide-content">
+                    <h3>DQN Extensions and Improvements</h3>
+                    
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">Double DQN</div>
+                            <ul>
+                                <li><strong>Problem:</strong> Standard DQN overestimates Q-values</li>
+                                <li><strong>Solution:</strong> Use main network to select action, target network to evaluate it</li>
+                                <li><strong>Target:</strong> \( r + \gamma Q_{\theta^-}(s', \arg\max_{a'} Q_{\theta}(s', a')) \)</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">Dueling DQN</div>
+                            <ul>
+                                <li><strong>Idea:</strong> Separate value of state and advantage of actions</li>
+                                <li><strong>Architecture:</strong> \( Q(s,a) = V(s) + A(s,a) - \text{mean}(A(s,:)) \)</li>
+                                <li><strong>Benefit:</strong> Better policy evaluation, especially when actions don't affect value much</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">Prioritized Experience Replay</div>
+                            <ul>
+                                <li><strong>Idea:</strong> Sample important transitions more frequently</li>
+                                <li><strong>Priority:</strong> Based on TD error magnitude</li>
+                                <li><strong>Benefit:</strong> Faster learning, more efficient use of samples</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">Distributional DQN</div>
+                            <ul>
+                                <li><strong>Idea:</strong> Learn distribution of returns, not just expected value</li>
+                                <li><strong>Benefit:</strong> Better handling of stochastic environments, risk-aware policies</li>
+                                <li><strong>Output:</strong> Probability distribution over possible returns</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">Noisy Networks</div>
+                            <ul>
+                                <li><strong>Idea:</strong> Add noise to network parameters for exploration</li>
+                                <li><strong>Benefit:</strong> State-dependent exploration, better than ε-greedy</li>
+                                <li><strong>Implementation:</strong> Learnable noise parameters in weights</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">Rainbow DQN</div>
+                            <ul>
+                                <li><strong>Idea:</strong> Combine all above improvements</li>
+                                <li><strong>Components:</strong> Double DQN + Dueling + Prioritized replay + Distributional + Noisy nets</li>
+                                <li><strong>Result:</strong> State-of-the-art performance on Atari games</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-arrow-up"></i> Evolution of DQN</h3>
+                        <p>Basic DQN (2013) → Double DQN (2015) → Dueling DQN (2016) → Rainbow DQN (2017)</p>
+                        <p>Each extension addresses specific limitations while keeping the core Bellman framework.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 23 -->
+            <div class="slide" id="slide23">
+                <div class="slide-header">
+                    <h2 class="slide-title">From 2-State MDP to Real-World Problems</h2>
+                    <div class="slide-number">23</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Scaling Up: Same Principles, Bigger Problems</h3>
+                    
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">Our 2-State MDP</div>
+                            <ul>
+                                <li><strong>States:</strong> 2 discrete states</li>
+                                <li><strong>Actions:</strong> 2 discrete actions</li>
+                                <li><strong>State representation:</strong> One-hot encoding</li>
+                                <li><strong>Network:</strong> 2 → 16 → 2</li>
+                                <li><strong>Training time:</strong> Seconds</li>
+                                <li><strong>Convergence:</strong> Obvious and fast</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">Atari Games (Original DQN)</div>
+                            <ul>
+                                <li><strong>States:</strong> 84×84×4 image frames</li>
+                                <li><strong>Actions:</strong> 4-18 discrete actions</li>
+                                <li><strong>State representation:</strong> CNN processing</li>
+                                <li><strong>Network:</strong> CNN → FC layers</li>
+                                <li><strong>Training time:</strong> Days on GPU</li>
+                                <li><strong>Convergence:</strong> Gradual over millions of steps</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <h3>Key Adaptations for Real Problems</h3>
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-cogs"></i> Modifications for Complex Environments</div>
+                        <ol>
+                            <li><strong>State representation:</strong> Use CNNs for images, RNNs for sequences</li>
+                            <li><strong>Action space:</strong> Continuous actions need different approaches (DDPG, SAC)</li>
+                            <li><strong>Reward shaping:</strong> Design rewards to guide learning in sparse reward settings</li>
+                            <li><strong>Parallelization:</strong> Use multiple environments for faster experience collection</li>
+                            <li><strong>Normalization:</strong> Normalize inputs and rewards for stable training</li>
+                        </ol>
+                    </div>
+                    
+                    <h3>Applications of DQN and Its Variants</h3>
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">Gaming</div>
+                            <ul>
+                                <li>Atari games (Breakout, Pong, Space Invaders)</li>
+                                <li>Go (AlphaGo uses different approach)</li>
+                                <li>Real-time strategy games</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">Robotics</div>
+                            <ul>
+                                <li>Robot navigation and manipulation</li>
+                                <li>Autonomous driving</li>
+                                <li>Drone control</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">Resource Management</div>
+                            <ul>
+                                <li>Data center cooling</li>
+                                <li>Network routing</li>
+                                <li>Energy management</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">Other Applications</div>
+                            <ul>
+                                <li>Recommendation systems</li>
+                                <li>Trading algorithms</li>
+                                <li>Healthcare treatment optimization</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-link"></i> The Common Thread</h3>
+                        <p>All these applications use the same core concepts: Bellman equation, TD learning, and value function approximation. The 2-state MDP contains all the essential ideas.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 24 -->
+            <div class="slide" id="slide24">
+                <div class="slide-header">
+                    <h2 class="slide-title">Teaching Philosophy & Learning Path</h2>
+                    <div class="slide-number">24</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Why This 2-State MDP Approach Works</h3>
+                    
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">For Students</div>
+                            <ul>
+                                <li><strong>Concreteness:</strong> Numbers and calculations make abstract concepts tangible</li>
+                                <li><strong>Tractability:</strong> Small enough to compute by hand, see all details</li>
+                                <li><strong>Pattern recognition:</strong> See how concepts connect across different representations</li>
+                                <li><strong>Confidence building:</strong> Master simple case before tackling complexity</li>
+                                <li><strong>Debugging skills:</strong> Understand what "should" happen at each step</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">For Teachers</div>
+                            <ul>
+                                <li><strong>Pedagogical tool:</strong> Illustrates all key concepts in one example</li>
+                                <li><strong>Bridge building:</strong> Connects theory (Bellman) to practice (code)</li>
+                                <li><strong>Scalable explanation:</strong> Start simple, then generalize</li>
+                                <li><strong>Common reference:</strong> Students can refer back to the simple case</li>
+                                <li><strong>Assessment tool:</strong> Check understanding through calculations</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <h3>Learning Path</h3>
+                    <div class="network-diagram">
+                        <div class="diagram-row">
+                            <div class="diagram-node" style="background: rgba(76, 175, 80, 0.3);">1. Tabular<br>Q-Learning</div>
+                            <div class="diagram-arrow">→</div>
+                            <div class="diagram-node" style="background: rgba(33, 150, 243, 0.3);">2. Bellman<br>Equation</div>
+                            <div class="diagram-arrow">→</div>
+                            <div class="diagram-node" style="background: rgba(255, 107, 107, 0.3);">3. DQN<br>Concept</div>
+                        </div>
+                        
+                        <div class="diagram-row">
+                            <div class="diagram-arrow">↓</div>
+                            <div></div>
+                            <div class="diagram-arrow">↓</div>
+                        </div>
+                        
+                        <div class="diagram-row">
+                            <div class="diagram-node" style="background: rgba(156, 39, 176, 0.3);">4. Experience<br>Replay</div>
+                            <div class="diagram-arrow">→</div>
+                            <div class="diagram-node" style="background: rgba(255, 193, 7, 0.3);">5. Gradient<br>Updates</div>
+                            <div class="diagram-arrow">→</div>
+                            <div class="diagram-node" style="background: rgba(0, 150, 136, 0.3);">6. Full<br>Implementation</div>
+                        </div>
+                    </div>
+                    
+                    <h3>Common Student Questions (Addressed Here)</h3>
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-question-circle"></i> Questions This Tutorial Answers</div>
+                        <ol>
+                            <li><strong>"How does Q-learning actually work?"</strong> → Step-by-step numerical examples</li>
+                            <li><strong>"What's the connection to Bellman equation?"</strong> → Direct mapping shown</li>
+                            <li><strong>"How does DQN differ from tabular Q-learning?"</strong> → Side-by-side comparison</li>
+                            <li><strong>"What is experience replay and why is it needed?"</strong> → Concrete explanation with examples</li>
+                            <li><strong>"How do gradients update the network?"</strong> → Mathematical derivation with numbers</li>
+                            <li><strong>"When does training converge?"</strong> → Clear convergence criteria explained</li>
+                            <li><strong>"Can I see actual code?"</strong> → Complete runnable PyTorch implementation</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-graduation-cap"></i> Teaching Philosophy</h3>
+                        <p>This tutorial follows the principle: <strong>"If you can't implement it for a toy problem, you don't understand it for real problems."</strong></p>
+                        <p>By thoroughly understanding the 2-state MDP, you build intuition that scales to complex real-world applications.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 25 -->
+            <div class="slide" id="slide25">
+                <div class="slide-header">
+                    <h2 class="slide-title">Summary & Next Steps</h2>
+                    <div class="slide-number">25</div>
+                </div>
+                <div class="slide-content">
+                    <h3>What We've Covered</h3>
+                    
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">Core Concepts</div>
+                            <ol>
+                                <li><strong>Model-free RL:</strong> Learning from experience without environment model</li>
+                                <li><strong>Q-Learning:</strong> TD learning algorithm for optimal action values</li>
+                                <li><strong>Bellman Equation:</strong> Foundation of value-based RL methods</li>
+                                <li><strong>Deep Q-Networks:</strong> Neural network approximation of Q-function</li>
+                                <li><strong>Experience Replay:</strong> Stabilizing technique using past experiences</li>
+                                <li><strong>Empirical Convergence:</strong> Practical criteria for stopping training</li>
+                            </ol>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">Technical Details</div>
+                            <ol>
+                                <li><strong>Mathematical derivations:</strong> From Bellman to gradient updates</li>
+                                <li><strong>Numerical examples:</strong> Step-by-step calculations</li>
+                                <li><strong>Code implementation:</strong> Complete PyTorch DQN</li>
+                                <li><strong>Visualizations:</strong> Network diagrams and flow charts</li>
+                                <li><strong>Comparisons:</strong> Tabular vs DQN, theory vs code</li>
+                                <li><strong>Practical tips:</strong> Debugging, hyperparameter tuning</li>
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <h3>Key Takeaways</h3>
+                    <div class="key-insight">
+                        <h3><i class="fas fa-key"></i> Most Important Insights</h3>
+                        <ol>
+                            <li><strong>DQN doesn't change RL fundamentals</strong> — it changes the representation (table → neural network)</li>
+                            <li><strong>Experience replay approximates expectation</strong> by averaging over samples</li>
+                            <li><strong>Gradient descent in DQN</strong> is the neural network version of Q-learning updates</li>
+                            <li><strong>Convergence is empirical</strong> — we stop when Q-values, policy, and rewards stabilize</li>
+                            <li><strong>The 2-state MDP contains all essential concepts</strong> that scale to complex problems</li>
+                        </ol>
+                    </div>
+                    
+                    <h3>Next Steps for Learners</h3>
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-road"></i> Learning Path Forward</div>
+                        <ol>
+                            <li><strong>Run the code:</strong> Execute the PyTorch implementation, modify parameters</li>
+                            <li><strong>Extend the MDP:</strong> Add more states/actions, change reward structure</li>
+                            <li><strong>Implement extensions:</strong> Try Double DQN, Dueling DQN, prioritized replay</li>
+                            <li><strong>Move to standard benchmarks:</strong> CartPole, LunarLander, Atari games</li>
+                            <li><strong>Explore related algorithms:</strong> Policy gradients (PPO), Actor-Critic methods</li>
+                            <li><strong>Read original papers:</strong> DQN (2013), Double DQN (2015), Rainbow (2017)</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="summary-box">
+                        <div class="summary-title">Final Summary</div>
+                        <p>Deep Q-Networks bridge classical reinforcement learning with deep learning, enabling agents to learn optimal behavior in complex environments through trial-and-error, using neural networks to approximate value functions and experience replay to stabilize learning.</p>
+                    </div>
+                    
+                    <div class="analogy">
+                        <h3><i class="fas fa-brain"></i> Final Analogy</h3>
+                        <p><strong>Tabular Q-Learning</strong> is like memorizing a specific recipe.</p>
+                        <p><strong>Deep Q-Networks</strong> are like learning the principles of cooking that let you create any recipe.</p>
+                        <p>Both get you a meal, but one is far more general and powerful.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>From Q-Learning to Deep Q-Networks - Complete Educational Tutorial</p>
+            <p>Based on reinforcement learning teaching materials | Use freely for educational purposes</p>
+        </footer>
+    </div>
+
+    <script>
+        // Initialize variables
+        let currentSlide = 1;
+        const totalSlides = 25;
+        
+        // Update slide counter display
+        function updateSlideCounter() {
+            document.getElementById('current-slide').textContent = currentSlide;
+            document.getElementById('total-slides').textContent = totalSlides;
+            
+            // Update URL hash for bookmarking
+            window.location.hash = `slide${currentSlide}`;
+        }
+        
+        // Navigate to a specific slide
+        function goToSlide(slideNumber) {
+            if (slideNumber < 1) slideNumber = 1;
+            if (slideNumber > totalSlides) slideNumber = totalSlides;
+            
+            currentSlide = slideNumber;
+            
+            // Scroll to the slide
+            const slideElement = document.getElementById(`slide${slideNumber}`);
+            if (slideElement) {
+                slideElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            
+            updateSlideCounter();
+        }
+        
+        // Next slide
+        document.getElementById('next-btn').addEventListener('click', () => {
+            goToSlide(currentSlide + 1);
+        });
+        
+        // Previous slide
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            goToSlide(currentSlide - 1);
+        });
+        
+        // Toggle view mode
+        document.getElementById('toggle-view').addEventListener('click', () => {
+            const slides = document.querySelectorAll('.slide');
+            const container = document.querySelector('.slides-container');
+            
+            if (container.classList.contains('grid-view')) {
+                // Switch back to normal view
+                container.classList.remove('grid-view');
+                slides.forEach(slide => {
+                    slide.style.maxWidth = '100%';
+                });
+                document.getElementById('toggle-view').innerHTML = '<i class="fas fa-expand"></i><span>Toggle View</span>';
+            } else {
+                // Switch to grid view
+                container.classList.add('grid-view');
+                slides.forEach(slide => {
+                    slide.style.maxWidth = '400px';
+                });
+                document.getElementById('toggle-view').innerHTML = '<i class="fas fa-compress"></i><span>Toggle View</span>';
+                
+                // Add grid view styles
+                if (!document.getElementById('grid-style')) {
+                    const style = document.createElement('style');
+                    style.id = 'grid-style';
+                    style.textContent = `
+                        .slides-container.grid-view {
+                            display: grid;
+                            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+                            gap: 20px;
+                        }
+                        
+                        .slides-container.grid-view .slide {
+                            height: 500px;
+                            overflow-y: auto;
+                        }
+                        
+                        @media (max-width: 900px) {
+                            .slides-container.grid-view {
+                                grid-template-columns: 1fr;
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'ArrowRight':
+                case ' ':
+                case 'PageDown':
+                    goToSlide(currentSlide + 1);
+                    e.preventDefault();
+                    break;
+                case 'ArrowLeft':
+                case 'PageUp':
+                    goToSlide(currentSlide - 1);
+                    e.preventDefault();
+                    break;
+                case 'Home':
+                    goToSlide(1);
+                    e.preventDefault();
+                    break;
+                case 'End':
+                    goToSlide(totalSlides);
+                    e.preventDefault();
+                    break;
+            }
+        });
+        
+        // Check URL hash on load
+        window.addEventListener('load', () => {
+            const hash = window.location.hash;
+            if (hash) {
+                const slideMatch = hash.match(/slide(\d+)/);
+                if (slideMatch) {
+                    const slideNum = parseInt(slideMatch[1]);
+                    if (slideNum >= 1 && slideNum <= totalSlides) {
+                        setTimeout(() => goToSlide(slideNum), 100);
+                    }
+                }
+            } else {
+                updateSlideCounter(); // Initialize counter
+            }
+            
+            // Initialize MathJax
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+            
+            // Initialize code highlighting
+            hljs.highlightAll();
+        });
+        
+        // Toggle hidden content
+        function toggleContent(id) {
+            const content = document.getElementById(id);
+            content.classList.toggle('show');
+        }
+        
+        // Re-render MathJax when slides change
+        function renderMathJax() {
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+        
+        // Add click handlers to slides for navigation (optional)
+        document.querySelectorAll('.slide').forEach((slide, index) => {
+            slide.addEventListener('dblclick', () => {
+                goToSlide(index + 1);
+            });
+        });
+    </script>
+</body>
+</html>

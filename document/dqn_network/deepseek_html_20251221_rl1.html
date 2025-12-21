@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q-Learning & Bellman Equation - Educational Presentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a237e 0%, #311b92 100%);
+            color: #f5f5f5;
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #00e5ff, #00b0ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .presentation-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .slide-counter {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 1.1rem;
+        }
+        
+        .slides-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .slide {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .slide:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+        
+        .slide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .slide-title {
+            font-size: 1.8rem;
+            color: #00e5ff;
+            font-weight: 600;
+        }
+        
+        .slide-number {
+            background: rgba(0, 229, 255, 0.2);
+            color: #00e5ff;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .slide-content {
+            font-size: 1.1rem;
+        }
+        
+        .formula {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            border-left: 4px solid #00e5ff;
+            overflow-x: auto;
+        }
+        
+        .formula.large {
+            font-size: 1.4rem;
+        }
+        
+        .symbol-explanation {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .symbol-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #00b0ff;
+        }
+        
+        .symbol-name {
+            font-weight: bold;
+            color: #00b0ff;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .example-box {
+            background: rgba(0, 229, 255, 0.1);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .example-title {
+            color: #00e5ff;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        th {
+            background: rgba(0, 229, 255, 0.2);
+            color: #00e5ff;
+            font-weight: 600;
+        }
+        
+        .comparison-table {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .comparison-col {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .comparison-title {
+            font-weight: bold;
+            color: #00b0ff;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.3rem;
+        }
+        
+        .key-insight {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            border-radius: 0 10px 10px 0;
+            margin: 25px 0;
+        }
+        
+        .key-insight h3 {
+            color: #ffc107;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .analogy {
+            background: rgba(76, 175, 80, 0.1);
+            border-left: 4px solid #4caf50;
+            padding: 20px;
+            border-radius: 0 10px 10px 0;
+            margin: 25px 0;
+        }
+        
+        .analogy h3 {
+            color: #4caf50;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .summary-box {
+            background: rgba(156, 39, 176, 0.1);
+            border: 1px solid rgba(156, 39, 176, 0.3);
+            border-radius: 10px;
+            padding: 25px;
+            margin: 25px 0;
+            text-align: center;
+        }
+        
+        .summary-title {
+            color: #9c27b0;
+            font-weight: bold;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .slide {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .symbol-explanation, .comparison-table {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-btn span {
+                display: none;
+            }
+            
+            .control-btn {
+                padding: 12px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Q-Learning & Bellman Equation</h1>
+            <p class="subtitle">A step-by-step, teacher-friendly explanation of reinforcement learning fundamentals with intuition and examples</p>
+            
+            <div class="presentation-controls">
+                <button class="control-btn" id="prev-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Previous</span>
+                </button>
+                
+                <div class="slide-counter">
+                    <span id="current-slide">1</span> / <span id="total-slides">25</span>
+                </div>
+                
+                <button class="control-btn" id="next-btn">
+                    <span>Next</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+                
+                <button class="control-btn" id="toggle-view">
+                    <i class="fas fa-expand"></i>
+                    <span>Toggle View</span>
+                </button>
+            </div>
+        </header>
+        
+        <div class="slides-container" id="slides-container">
+            <!-- Slide 1 -->
+            <div class="slide" id="slide1">
+                <div class="slide-header">
+                    <h2 class="slide-title">The Q-Learning Formula</h2>
+                    <div class="slide-number">1</div>
+                </div>
+                <div class="slide-content">
+                    <p>This formula answers one key question:</p>
+                    <p class="formula large">"How should I update my belief about how good an action is, after I try it once?"</p>
+                    
+                    <div class="formula large">
+                        \[ Q(s, a) \leftarrow Q(s, a) + \alpha \left[ r + \gamma \max_{a'} Q(s', a') - Q(s, a) \right] \]
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-lightbulb"></i> Key Insight</h3>
+                        <p><strong>New Q = Old Q + (Learning Rate × Prediction Error)</strong></p>
+                        <p>This is the same idea as correcting exam answers, adjusting expectations after feedback, or updating beliefs from experience.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 2 -->
+            <div class="slide" id="slide2">
+                <div class="slide-header">
+                    <h2 class="slide-title">Meaning of Each Symbol</h2>
+                    <div class="slide-number">2</div>
+                </div>
+                <div class="slide-content">
+                    <div class="symbol-explanation">
+                        <div class="symbol-item">
+                            <div class="symbol-name">\( Q(s, a) \) — Current Knowledge</div>
+                            <p>The agent's current estimate of how good it is to take action \(a\) in state \(s\).</p>
+                            <p><strong>Interpretation:</strong> "How good do I think this action is right now?"</p>
+                        </div>
+                        
+                        <div class="symbol-item">
+                            <div class="symbol-name">\( r \) — Immediate Reward</div>
+                            <p>The reward received right after taking action \(a\) in state \(s\).</p>
+                            <p><strong>Interpretation:</strong> "What feedback did I get immediately?"</p>
+                            <div class="example-box">
+                                <div class="example-title"><i class="fas fa-star"></i> Examples:</div>
+                                <ul>
+                                    <li>+1 for winning</li>
+                                    <li>–1 for crashing</li>
+                                    <li>0 for neutral move</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 3 -->
+            <div class="slide" id="slide3">
+                <div class="slide-header">
+                    <h2 class="slide-title">More Symbols & Parameters</h2>
+                    <div class="slide-number">3</div>
+                </div>
+                <div class="slide-content">
+                    <div class="symbol-explanation">
+                        <div class="symbol-item">
+                            <div class="symbol-name">\( s' \) — Next State</div>
+                            <p>The state the agent ends up in after taking the action.</p>
+                        </div>
+                        
+                        <div class="symbol-item">
+                            <div class="symbol-name">\( \max_{a'} Q(s', a') \) — Best Future Value</div>
+                            <p>The best Q-value among all possible actions in the next state \(s'\).</p>
+                            <p><strong>Interpretation:</strong> "If I behave optimally from now on, how good can things get?"</p>
+                            <p><em>This is why Q-Learning is off-policy</em> — it assumes optimal future behavior, not what the agent actually does next.</p>
+                        </div>
+                        
+                        <div class="symbol-item">
+                            <div class="symbol-name">\( \gamma \) (gamma) — Discount Factor</div>
+                            <p>Range: \(0 \le \gamma \le 1\)</p>
+                            <p>Controls how much the agent cares about the future.</p>
+                            <ul>
+                                <li>\( \gamma = 0 \) → only care about immediate reward</li>
+                                <li>\( \gamma = 0.99 \) → long-term planning</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="symbol-item">
+                            <div class="symbol-name">\( \alpha \) (alpha) — Learning Rate</div>
+                            <p>Range: \(0 < \alpha \le 1\)</p>
+                            <p>Controls how much new information overrides old information.</p>
+                            <ul>
+                                <li>Small \( \alpha \) → learn slowly, stable</li>
+                                <li>Large \( \alpha \) → learn fast, unstable</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 4 -->
+            <div class="slide" id="slide4">
+                <div class="slide-header">
+                    <h2 class="slide-title">Temporal Difference (TD) Error</h2>
+                    <div class="slide-number">4</div>
+                </div>
+                <div class="slide-content">
+                    <div class="formula large">
+                        \[ \delta = r + \gamma \max Q(s', a') - Q(s, a) \]
+                    </div>
+                    
+                    <p>This is called the <strong>Temporal Difference (TD) error</strong>.</p>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-exclamation-triangle"></i> Meaning</h3>
+                        <p>"How wrong was my previous prediction?"</p>
+                        <ul>
+                            <li><strong>Positive</strong> → action was <strong>better than expected</strong></li>
+                            <li><strong>Negative</strong> → action was <strong>worse than expected</strong></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="analogy">
+                        <h3><i class="fas fa-brain"></i> Human Learning Analogy</h3>
+                        <p>This is exactly how humans learn from feedback:</p>
+                        <ul>
+                            <li>You expect an action to give a certain result</li>
+                            <li>You observe the actual result</li>
+                            <li>You adjust your expectation based on the difference</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 5 -->
+            <div class="slide" id="slide5">
+                <div class="slide-header">
+                    <h2 class="slide-title">Numerical Example</h2>
+                    <div class="slide-number">5</div>
+                </div>
+                <div class="slide-content">
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-calculator"></i> Assume:</div>
+                        <ul>
+                            <li>\( Q(s,a) = 5 \)</li>
+                            <li>Reward \( r = 2 \)</li>
+                            <li>Best future value \( \max Q(s',a') = 8 \)</li>
+                            <li>\( \gamma = 0.9 \)</li>
+                            <li>\( \alpha = 0.1 \)</li>
+                        </ul>
+                    </div>
+                    
+                    <h3>Step 1: Compute Target</h3>
+                    <div class="formula">
+                        \[ r + \gamma \max Q = 2 + 0.9 \times 8 = 9.2 \]
+                    </div>
+                    
+                    <h3>Step 2: Compute Error</h3>
+                    <div class="formula">
+                        \[ 9.2 - 5 = 4.2 \]
+                    </div>
+                    
+                    <h3>Step 3: Update Q</h3>
+                    <div class="formula">
+                        \[ Q = 5 + 0.1 \times 4.2 = 5.42 \]
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-check-circle"></i> Result</h3>
+                        <p>The value increases because the outcome was better than expected (TD error = +4.2).</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 6 -->
+            <div class="slide" id="slide6">
+                <div class="slide-header">
+                    <h2 class="slide-title">Why This Formula Works</h2>
+                    <div class="slide-number">6</div>
+                </div>
+                <div class="slide-content">
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">Advantages</div>
+                            <ul>
+                                <li><i class="fas fa-check"></i> Learns from trial and error</li>
+                                <li><i class="fas fa-check"></i> No environment model needed</li>
+                                <li><i class="fas fa-check"></i> Converges to optimal policy (under conditions)</li>
+                                <li><i class="fas fa-check"></i> Foundation of Deep Q-Networks (DQN) and modern RL</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">Key Properties</div>
+                            <ul>
+                                <li><i class="fas fa-robot"></i> Model-free: doesn't need transition probabilities</li>
+                                <li><i class="fas fa-chart-line"></i> Off-policy: learns optimal policy while following exploration policy</li>
+                                <li><i class="fas fa-cogs"></i> Incremental: updates after each experience</li>
+                                <li><i class="fas fa-bullseye"></i> Bootstrapping: uses own estimates to update estimates</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-box">
+                        <div class="summary-title">One-Sentence Summary (Good for Slides)</div>
+                        <p>Q-Learning updates action values by correcting past predictions using immediate reward and the best possible future outcome.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 7 -->
+            <div class="slide" id="slide7">
+                <div class="slide-header">
+                    <h2 class="slide-title">Bellman Optimality Equation</h2>
+                    <div class="slide-number">7</div>
+                </div>
+                <div class="slide-content">
+                    <div class="formula large">
+                        \[ Q^*(s,a) = \mathbb{E}\left[ r + \gamma \max_{a'} Q^*(s',a') \right] \]
+                    </div>
+                    
+                    <p>The Bellman Optimality Equation defines what the <strong>optimal Q-value</strong> should be.</p>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-quote-right"></i> Meaning (in words)</h3>
+                        <p>The optimal value of an action equals the expected immediate reward plus the discounted value of the best future action.</p>
+                    </div>
+                    
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-exclamation-circle"></i> Important Distinction</div>
+                        <p>This is <strong>not a learning rule</strong> — it's a definition of optimal behavior.</p>
+                        <p><strong>Problem:</strong> We don't know \( Q^* \), we don't know environment dynamics, and we can't compute the expectation directly.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 8 -->
+            <div class="slide" id="slide8">
+                <div class="slide-header">
+                    <h2 class="slide-title">From Bellman Equation to Learning Rule</h2>
+                    <div class="slide-number">8</div>
+                </div>
+                <div class="slide-content">
+                    <p>Q-Learning turns the Bellman equation into a practical update rule.</p>
+                    
+                    <h3>Bellman Target (what we want Q to be)</h3>
+                    <div class="formula">
+                        \[ \text{Target} = r + \gamma \max_{a'} Q(s',a') \]
+                    </div>
+                    
+                    <h3>Current Estimate</h3>
+                    <div class="formula">
+                        \[ \text{Estimate} = Q(s,a) \]
+                    </div>
+                    
+                    <h3>Error (difference)</h3>
+                    <div class="formula">
+                        \[ \text{TD Error} = \text{Target} - \text{Estimate} \]
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-cogs"></i> Q-Learning Update = Incremental Bellman Backup</h3>
+                        <p>Now we update Q <strong>a little bit toward</strong> the Bellman target:</p>
+                        <div class="formula">
+                            \[ Q(s,a) \leftarrow Q(s,a) + \alpha \left[ \underbrace{r + \gamma \max_{a'} Q(s',a')}_{\text{Bellman target}} - \underbrace{Q(s,a)}_{\text{current estimate}} \right] \]
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 9 -->
+            <div class="slide" id="slide9">
+                <div class="slide-header">
+                    <h2 class="slide-title">Why This Is Called a "Bellman Backup"</h2>
+                    <div class="slide-number">9</div>
+                </div>
+                <div class="slide-content">
+                    <div class="key-insight">
+                        <h3><i class="fas fa-key"></i> Key Insight</h3>
+                        <p>Q-Learning is repeatedly applying the Bellman Optimality Equation using sampled experience instead of expectations.</p>
+                    </div>
+                    
+                    <p>Each update:</p>
+                    <ul>
+                        <li>Looks one step ahead</li>
+                        <li>Assumes optimal behavior in the future</li>
+                        <li>Pushes the current estimate closer to optimal</li>
+                    </ul>
+                    
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-project-diagram"></i> Bellman Backup Process</div>
+                        <p>future value ↑<br>max Q(s', a') ↓<br>reward → r + γ × future ↓<br>update Q(s, a)</p>
+                    </div>
+                    
+                    <h3>Conceptual Comparison (Very Important for Students)</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Bellman Optimality</th>
+                                <th>Q-Learning</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Definition</td>
+                                <td>Algorithm</td>
+                            </tr>
+                            <tr>
+                                <td>Exact</td>
+                                <td>Approximate</td>
+                            </tr>
+                            <tr>
+                                <td>Uses expectation</td>
+                                <td>Uses samples</td>
+                            </tr>
+                            <tr>
+                                <td>Needs full model</td>
+                                <td>Model-free</td>
+                            </tr>
+                            <tr>
+                                <td>Theoretical</td>
+                                <td>Practical</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Slide 10 -->
+            <div class="slide" id="slide10">
+                <div class="slide-header">
+                    <h2 class="slide-title">Human Learning Analogy</h2>
+                    <div class="slide-number">10</div>
+                </div>
+                <div class="slide-content">
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">Bellman Equation</div>
+                            <p>"If I always act optimally from now on, this is how good this choice is."</p>
+                            <p><em>This is like having perfect foresight and knowing all possible outcomes.</em></p>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">Q-Learning Update</div>
+                            <p>"I was wrong before. Let me adjust my belief slightly based on what just happened."</p>
+                            <p><em>This is how we actually learn from experience.</em></p>
+                        </div>
+                    </div>
+                    
+                    <div class="analogy">
+                        <h3><i class="fas fa-user-graduate"></i> This Mirrors Human Learning:</h3>
+                        <ul>
+                            <li><strong>Language learning</strong>: Adjusting grammar rules based on feedback</li>
+                            <li><strong>Skill acquisition</strong>: Refining technique after each attempt</li>
+                            <li><strong>Trial-and-error teaching</strong>: Learning which approaches work best</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 11 -->
+            <div class="slide" id="slide11">
+                <div class="slide-header">
+                    <h2 class="slide-title">One-Slide Summary & Bridge to Neural Networks</h2>
+                    <div class="slide-number">11</div>
+                </div>
+                <div class="slide-content">
+                    <div class="summary-box">
+                        <div class="summary-title">Teaching Summary</div>
+                        <p>The Bellman Optimality Equation defines what optimal values should be; Q-Learning learns those values gradually from experience using temporal-difference updates.</p>
+                    </div>
+                    
+                    <h3>Bridge to Neural Networks (Preview for DQN)</h3>
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">Tabular Q-Learning</div>
+                            <p>\( Q(s,a) \) stored in a table</p>
+                            <ul>
+                                <li>Simple, exact for small spaces</li>
+                                <li>Doesn't scale to large state spaces</li>
+                                <li>No generalization between similar states</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">Deep RL (DQN)</div>
+                            <p>\( Q(s,a;\theta) \) approximated by a neural network</p>
+                            <ul>
+                                <li>Scales to large state spaces</li>
+                                <li>Generalizes between similar states</li>
+                                <li>Loss function: \( \left( r + \gamma \max Q(s',a';\theta) - Q(s,a;\theta) \right)^2 \)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-exchange-alt"></i> Same Bellman Idea, Different Representation</h3>
+                        <p>The core Bellman backup idea remains the same, but the representation changes from a table to a neural network.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 12 -->
+            <div class="slide" id="slide12">
+                <div class="slide-header">
+                    <h2 class="slide-title">Expectation in Reinforcement Learning</h2>
+                    <div class="slide-number">12</div>
+                </div>
+                <div class="slide-content">
+                    <p>In the Bellman Optimality Equation:</p>
+                    <div class="formula large">
+                        \[ Q^*(s,a) = \mathbb{E}\left[ r + \gamma \max_{a'} Q^*(s',a') \right] \]
+                    </div>
+                    
+                    <p>The symbol \( \mathbb{E}[\cdot] \) is the mathematical expectation from probability theory.</p>
+                    
+                    <div class="formula">
+                        \[ \mathbb{E}[X] = \sum_{x} x \cdot P(X = x) \]
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-equals"></i> Same Definition, Same Math</h3>
+                        <p>✔ Same definition as probability theory<br>
+                        ✔ Same mathematical rules<br>
+                        ✔ Same probability concepts</p>
+                    </div>
+                    
+                    <div class="analogy">
+                        <h3><i class="fas fa-dice"></i> Why Expectation Is Needed</h3>
+                        <p>Because the same action can lead to different outcomes in a stochastic environment.</p>
+                        <p><strong>Example:</strong> You take action "move right" — 80% chance of safe tile (+1 reward), 20% chance of trap (-5 reward). The true value is the average outcome over many trials.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 13 -->
+            <div class="slide" id="slide13">
+                <div class="slide-header">
+                    <h2 class="slide-title">What Is Random in RL?</h2>
+                    <div class="slide-number">13</div>
+                </div>
+                <div class="slide-content">
+                    <p>The expectation is taken over random variables caused by the environment:</p>
+                    
+                    <div class="symbol-explanation">
+                        <div class="symbol-item">
+                            <div class="symbol-name">Next State \( s' \)</div>
+                            <p>Random according to transition probability:</p>
+                            <div class="formula">
+                                \[ s' \sim P(s' \mid s,a) \]
+                            </div>
+                        </div>
+                        
+                        <div class="symbol-item">
+                            <div class="symbol-name">Reward \( r \)</div>
+                            <p>Random according to reward distribution:</p>
+                            <div class="formula">
+                                \[ r \sim R(r \mid s,a,s') \]
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p>So the expectation really means:</p>
+                    <div class="formula">
+                        \[ Q^*(s,a) = \sum_{s'} P(s' \mid s,a) \sum_{r} P(r \mid s,a,s') \left[ r + \gamma \max_{a'} Q^*(s',a') \right] \]
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-calculator"></i> This Is Exactly Probability Theory</h3>
+                        <p>The Bellman equation is fundamentally a probabilistic equation that accounts for all possible outcomes weighted by their probabilities.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 14 -->
+            <div class="slide" id="slide14">
+                <div class="slide-header">
+                    <h2 class="slide-title">Why Q-Learning Doesn't Compute Expectation Directly</h2>
+                    <div class="slide-number">14</div>
+                </div>
+                <div class="slide-content">
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">In Theory (Model-Based)</div>
+                            <ul>
+                                <li>Bellman equation uses full expectation</li>
+                                <li>Requires knowing:
+                                    <ul>
+                                        <li>Transition probabilities \( P(s' \mid s,a) \)</li>
+                                        <li>Reward distributions \( R(r \mid s,a,s') \)</li>
+                                    </ul>
+                                </li>
+                                <li>Can compute exact optimal values</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">In Practice (Model-Free)</div>
+                            <ul>
+                                <li>We usually don't know these probabilities</li>
+                                <li>Environment may be complex or unknown</li>
+                                <li>So Q-Learning uses:
+                                    <div class="formula">
+                                        \[ r + \gamma \max Q(s',a') \quad \text{(from one sample)} \]
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-lightbulb"></i> Key Insight</h3>
+                        <p>Q-Learning uses <strong>sample-based approximation</strong> of expectation instead of computing it analytically.</p>
+                        <p>Over many updates, the average of samples → expectation (by the Law of Large Numbers).</p>
+                    </div>
+                    
+                    <div class="summary-box">
+                        <div class="summary-title">One-Sentence Teaching Summary</div>
+                        <p>Expectation in the Bellman equation is the same expectation as in probability theory; Q-learning approximates it using samples from experience instead of computing it analytically.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 15 -->
+            <div class="slide" id="slide15">
+                <div class="slide-header">
+                    <h2 class="slide-title">Sampling vs Expectation</h2>
+                    <div class="slide-number">15</div>
+                </div>
+                <div class="slide-content">
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">Bellman Equation (Model-based)</div>
+                            <div class="formula">
+                                \[ \mathbb{E}\left[ r + \gamma \max Q(s',a') \right] \]
+                            </div>
+                            <p>Computes exact average over all possible outcomes</p>
+                            <p><strong>Requires:</strong> Full knowledge of environment dynamics</p>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">Q-Learning (Model-free)</div>
+                            <div class="formula">
+                                \[ r + \gamma \max Q(s',a') \quad \text{(from one sample)} \]
+                            </div>
+                            <p>Uses single observed outcome as estimate</p>
+                            <p><strong>Requires:</strong> Only actual experience (state, action, reward, next state)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="analogy">
+                        <h3><i class="fas fa-balance-scale"></i> Law of Large Numbers in Action</h3>
+                        <p>With enough samples, the Q-Learning estimates converge to the true expected values:</p>
+                        <div class="formula">
+                            \[ \frac{1}{N} \sum_{i=1}^{N} \left[ r_i + \gamma \max Q(s'_i, a') \right] \rightarrow \mathbb{E}\left[ r + \gamma \max Q(s',a') \right] \]
+                        </div>
+                        <p>as \( N \rightarrow \infty \)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 16 -->
+            <div class="slide" id="slide16">
+                <div class="slide-header">
+                    <h2 class="slide-title">Human Learning Analogy for Expectation</h2>
+                    <div class="slide-number">16</div>
+                </div>
+                <div class="slide-content">
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">Expectation</div>
+                            <p>"On average, this strategy works well."</p>
+                            <p><em>This is like knowing the statistical properties of an action.</em></p>
+                            <div class="example-box">
+                                <p><strong>Example:</strong> "Based on data from 1000 games, moving right gives +0.8 points on average."</p>
+                            </div>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">Sample</div>
+                            <p>"This time, it worked (or failed)."</p>
+                            <p><em>This is a single experience or trial.</em></p>
+                            <div class="example-box">
+                                <p><strong>Example:</strong> "In my last game, moving right made me crash and lose."</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-brain"></i> Learning Process</h3>
+                        <p>Learning = adjusting beliefs so that sample averages converge to expected values.</p>
+                        <p>We start with individual experiences (samples) and gradually build up an understanding of what works on average (expectation).</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 17 -->
+            <div class="slide" id="slide17">
+                <div class="slide-header">
+                    <h2 class="slide-title">Bridge to Neural Networks (Deep RL)</h2>
+                    <div class="slide-number">17</div>
+                </div>
+                <div class="slide-content">
+                    <p>In Deep Reinforcement Learning (like DQN):</p>
+                    
+                    <div class="formula large">
+                        \[ \text{Loss} = \mathbb{E}\left[ \left( r + \gamma \max_{a'} Q(s',a';\theta) - Q(s,a;\theta) \right)^2 \right] \]
+                    </div>
+                    
+                    <p>We minimize the squared TD error, where:</p>
+                    <ul>
+                        <li>\( Q(s,a;\theta) \) is a neural network with parameters \( \theta \)</li>
+                        <li>The expectation is approximated by mini-batches of samples</li>
+                        <li>Gradient descent updates the network to reduce prediction error</li>
+                    </ul>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-sync-alt"></i> Same Core Principles</h3>
+                        <p>Again — <strong>expectation = probability theory</strong>, approximated by <strong>mini-batches of samples</strong>.</p>
+                        <p>The Bellman backup idea remains central, but now the Q-function is represented by a neural network instead of a table.</p>
+                    </div>
+                    
+                    <div class="analogy">
+                        <h3><i class="fas fa-project-diagram"></i> From Tabular to Deep RL</h3>
+                        <p><strong>Tabular Q-Learning:</strong> Memory-based, exact for small spaces<br>
+                        <strong>Deep Q-Networks:</strong> Generalization-based, scales to complex environments</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 18 -->
+            <div class="slide" id="slide18">
+                <div class="slide-header">
+                    <h2 class="slide-title">A Concrete Model-Free MDP Example</h2>
+                    <div class="slide-number">18</div>
+                </div>
+                <div class="slide-content">
+                    <p>Let's examine a <strong>2-State Navigation MDP</strong> that demonstrates:</p>
+                    
+                    <div class="symbol-explanation">
+                        <div class="symbol-item">
+                            <div class="symbol-name">Delayed Reward</div>
+                            <p>Reward may come several steps after the action that caused it</p>
+                        </div>
+                        
+                        <div class="symbol-item">
+                            <div class="symbol-name">Bootstrapping</div>
+                            <p>Using current estimates to update other estimates</p>
+                        </div>
+                        
+                        <div class="symbol-item">
+                            <div class="symbol-name">Empirical Convergence</div>
+                            <p>Learning stabilizes through experience, not theoretical calculation</p>
+                        </div>
+                    </div>
+                    
+                    <h3>Environment Definition (Unknown to Agent)</h3>
+                    
+                    <div class="comparison-table">
+                        <div class="comparison-col">
+                            <div class="comparison-title">States</div>
+                            <ul>
+                                <li>\( S_0 \) — Start</li>
+                                <li>\( S_1 \) — Goal area</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="comparison-col">
+                            <div class="comparison-title">Actions</div>
+                            <p>Available in both states:</p>
+                            <ul>
+                                <li>Left</li>
+                                <li>Right</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 19 -->
+            <div class="slide" id="slide19">
+                <div class="slide-header">
+                    <h2 class="slide-title">Environment Dynamics (The "Model")</h2>
+                    <div class="slide-number">19</div>
+                </div>
+                <div class="slide-content">
+                    <p>The agent does NOT know these rules — it must learn them through experience.</p>
+                    
+                    <h3>From \( S_0 \) (Start)</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Action</th>
+                                <th>Next State</th>
+                                <th>Reward</th>
+                                <th>Interpretation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Left</td>
+                                <td>\( S_1 \)</td>
+                                <td>0</td>
+                                <td>Goes to goal area, no immediate reward</td>
+                            </tr>
+                            <tr>
+                                <td>Right</td>
+                                <td>\( S_0 \)</td>
+                                <td>-0.1</td>
+                                <td>Stays in start, small penalty</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h3>From \( S_1 \) (Goal Area)</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Action</th>
+                                <th>Next State</th>
+                                <th>Reward</th>
+                                <th>Interpretation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Left</td>
+                                <td>\( S_1 \)</td>
+                                <td>-1</td>
+                                <td>Stays in goal, penalty</td>
+                            </tr>
+                            <tr>
+                                <td>Right</td>
+                                <td>\( S_0 \)</td>
+                                <td>+1</td>
+                                <td>Returns to start, big reward</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-map-signs"></i> Optimal Strategy</h3>
+                        <p>The optimal policy is: \( S_0 \rightarrow \text{Left} \rightarrow S_1 \rightarrow \text{Right} \rightarrow S_0 \) (cycle)</p>
+                        <p>This gives: 0 (first step) + 1 (second step) = 1 reward per 2-step cycle</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 20 -->
+            <div class="slide" id="slide20">
+                <div class="slide-header">
+                    <h2 class="slide-title">Learning Setup</h2>
+                    <div class="slide-number">20</div>
+                </div>
+                <div class="slide-content">
+                    <div class="example-box">
+                        <div class="example-title"><i class="fas fa-cogs"></i> Algorithm Parameters</div>
+                        <ul>
+                            <li><strong>Algorithm:</strong> Q-Learning</li>
+                            <li><strong>Discount:</strong> \( \gamma = 0.9 \)</li>
+                            <li><strong>Learning rate:</strong> \( \alpha = 0.5 \)</li>
+                            <li><strong>Initial Q-values:</strong> all 0</li>
+                            <li><strong>Exploration:</strong> ε-greedy (not shown in simple example)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="formula">
+                        \[ Q(s,a) \leftarrow Q(s,a) + \alpha \left[ r + \gamma \max_{a'} Q(s',a') - Q(s,a) \right] \]
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-eye-slash"></i> Why This Is Model-Free</h3>
+                        <p>The agent:</p>
+                        <ul>
+                            <li>❌ does not know transition probabilities</li>
+                            <li>❌ does not know reward function</li>
+                            <li>✅ only observes: (state, action, reward, next_state)</li>
+                            <li>✅ learns purely from experience</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 21 -->
+            <div class="slide" id="slide21">
+                <div class="slide-header">
+                    <h2 class="slide-title">First 3 Episodes (Fully Worked)</h2>
+                    <div class="slide-number">21</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Episode 1</h3>
+                    <ul>
+                        <li><strong>State:</strong> \( S_0 \)</li>
+                        <li><strong>Action:</strong> Left (exploring)</li>
+                        <li><strong>Result:</strong> Next state = \( S_1 \), Reward = 0</li>
+                    </ul>
+                    <div class="formula">
+                        \[ Q(S_0,\text{Left}) = 0 + 0.5(0 + 0.9 \times 0 - 0) = 0 \]
+                    </div>
+                    <p>✔️ No learning yet — future value unknown</p>
+                    
+                    <h3>Episode 2</h3>
+                    <ul>
+                        <li><strong>State:</strong> \( S_1 \)</li>
+                        <li><strong>Action:</strong> Right (exploring)</li>
+                        <li><strong>Result:</strong> Next state = \( S_0 \), Reward = +1</li>
+                    </ul>
+                    <div class="formula">
+                        \[ Q(S_1,\text{Right}) = 0 + 0.5(1 + 0.9 \times 0 - 0) = 0.5 \]
+                    </div>
+                    <p>✔️ First strong signal appears</p>
+                    
+                    <h3>Episode 3</h3>
+                    <ul>
+                        <li><strong>State:</strong> \( S_0 \)</li>
+                        <li><strong>Action:</strong> Left</li>
+                        <li><strong>Result:</strong> Next state = \( S_1 \), Reward = 0</li>
+                    </ul>
+                    <div class="formula">
+                        \[ Q(S_0,\text{Left}) = 0 + 0.5(0 + 0.9 \times 0.5 - 0) = 0.225 \]
+                    </div>
+                    <p>✔️ Delayed reward is now backing up from \( S_1 \rightarrow S_0 \)</p>
+                </div>
+            </div>
+            
+            <!-- Slide 22 -->
+            <div class="slide" id="slide22">
+                <div class="slide-header">
+                    <h2 class="slide-title">Q-Table After 3 Episodes</h2>
+                    <div class="slide-number">22</div>
+                </div>
+                <div class="slide-content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>State</th>
+                                <th>Left</th>
+                                <th>Right</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>\( S_0 \)</td>
+                                <td>0.225</td>
+                                <td>0</td>
+                            </tr>
+                            <tr>
+                                <td>\( S_1 \)</td>
+                                <td>0</td>
+                                <td>0.5</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="symbol-explanation">
+                        <div class="symbol-item">
+                            <div class="symbol-name">✅ What's Good</div>
+                            <ul>
+                                <li>Learning has started</li>
+                                <li>Delayed reward propagation is visible</li>
+                                <li>Better actions have higher values</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="symbol-item">
+                            <div class="symbol-name">⚠️ What's Not Yet</div>
+                            <ul>
+                                <li>Still very noisy (only 3 samples)</li>
+                                <li>Not yet "correct" values</li>
+                                <li>Policy may still be suboptimal</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-forward"></i> Now We SKIP Forward</h3>
+                        <p>Assume many episodes with:</p>
+                        <ul>
+                            <li>Continued exploration</li>
+                            <li>Learning rate slowly decays: \( \alpha_t \downarrow 0 \)</li>
+                            <li>Hundreds of experiences</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 23 -->
+            <div class="slide" id="slide23">
+                <div class="slide-header">
+                    <h2 class="slide-title">Stabilized Phase (Empirical Convergence)</h2>
+                    <div class="slide-number">23</div>
+                </div>
+                <div class="slide-content">
+                    <p>After hundreds of episodes, we observe stabilization:</p>
+                    
+                    <h3>1. Q-Values Stabilize</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>State</th>
+                                <th>Left</th>
+                                <th>Right</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>\( S_0 \)</td>
+                                <td>~0.81</td>
+                                <td>~0.20</td>
+                            </tr>
+                            <tr>
+                                <td>\( S_1 \)</td>
+                                <td>~-1.0</td>
+                                <td>~1.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p>Changes per update ≈ tiny</p>
+                    <p>✔ Bellman fixed point reached approximately ✔ Expectation learned from samples</p>
+                    
+                    <h3>2. Policy No Longer Changes</h3>
+                    <div class="formula">
+                        \[ \text{Policy} = \arg\max_a Q(s,a) \]
+                    </div>
+                    <ul>
+                        <li>At \( S_0 \) → choose Left</li>
+                        <li>At \( S_1 \) → choose Right</li>
+                    </ul>
+                    <p>Agent behavior becomes: \( S_0 \rightarrow S_1 \rightarrow S_0 \rightarrow S_1 \rightarrow ... \)</p>
+                    <p>✔ No oscillation ✔ No indecision</p>
+                </div>
+            </div>
+            
+            <!-- Slide 24 -->
+            <div class="slide" id="slide24">
+                <div class="slide-header">
+                    <h2 class="slide-title">Reward Curve & Empirical Convergence</h2>
+                    <div class="slide-number">24</div>
+                </div>
+                <div class="slide-content">
+                    <h3>3. Reward Curve Plateaus</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Phase</th>
+                                <th>Avg Reward</th>
+                                <th>Interpretation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Early</td>
+                                <td>noisy / negative</td>
+                                <td>Random exploration, many mistakes</td>
+                            </tr>
+                            <tr>
+                                <td>Middle</td>
+                                <td>rising</td>
+                                <td>Learning, improving policy</td>
+                            </tr>
+                            <tr>
+                                <td>Late</td>
+                                <td>flat at max (~0.5 per step)</td>
+                                <td>Learning saturated, optimal policy</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <p>✔ Flat curve = learning saturated</p>
+                    
+                    <div class="key-insight">
+                        <h3><i class="fas fa-flag-checkered"></i> Why This Is Called Empirical Convergence</h3>
+                        <p><strong>Important truth:</strong> We never know the true expectation exactly in model-free RL.</p>
+                        <p>Instead, we rely on observable signals:</p>
+                        <ul>
+                            <li>✔ Q-values stop changing significantly</li>
+                            <li>✔ Policy stops changing</li>
+                            <li>✔ Rewards stop improving</li>
+                        </ul>
+                        <p>That's <strong>empirical convergence</strong> — learning stabilizes based on experience, not theoretical calculation.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 25 -->
+            <div class="slide" id="slide25">
+                <div class="slide-header">
+                    <h2 class="slide-title">Key Insight & Teaching Summary</h2>
+                    <div class="slide-number">25</div>
+                </div>
+                <div class="slide-content">
+                    <div class="key-insight">
+                        <h3><i class="fas fa-key"></i> Key Insight (Very Important)</h3>
+                        <p>Model-free RL never waits for a known number of samples; it stops improving when behavior and value estimates stabilize under continued experience.</p>
+                    </div>
+                    
+                    <div class="summary-box">
+                        <div class="summary-title">One-Sentence Teaching Summary</div>
+                        <p>In a model-free MDP, learning proceeds through noisy early episodes, delayed reward propagation, and finally empirical convergence signaled by stable Q-values, stable policy, and plateaued rewards.</p>
+                    </div>
+                    
+                    <h3>Recap of Core Concepts</h3>
+                    <div class="symbol-explanation">
+                        <div class="symbol-item">
+                            <div class="symbol-name">Q-Learning Update</div>
+                            <p>\[ Q(s,a) \leftarrow Q(s,a) + \alpha \left[ r + \gamma \max_{a'} Q(s',a') - Q(s,a) \right] \]</p>
+                        </div>
+                        
+                        <div class="symbol-item">
+                            <div class="symbol-name">Bellman Optimality</div>
+                            <p>\[ Q^*(s,a) = \mathbb{E}\left[ r + \gamma \max_{a'} Q^*(s',a') \right] \]</p>
+                        </div>
+                    </div>
+                    
+                    <div class="analogy">
+                        <h3><i class="fas fa-graduation-cap"></i> Teaching Philosophy</h3>
+                        <p>This presentation follows a pedagogical approach that:</p>
+                        <ol>
+                            <li>Starts with intuition and simple formulas</li>
+                            <li>Connects to human learning experiences</li>
+                            <li>Builds up mathematical rigor gradually</li>
+                            <li>Uses concrete examples to illustrate abstract concepts</li>
+                            <li>Shows both theory (Bellman) and practice (Q-Learning)</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Q-Learning & Bellman Equation Educational Presentation | Created for CS/AI Students</p>
+            <p>Based on RL/DQN teaching materials | Use freely for educational purposes</p>
+        </footer>
+    </div>
+
+    <script>
+        // Initialize variables
+        let currentSlide = 1;
+        const totalSlides = 25;
+        
+        // Update slide counter display
+        function updateSlideCounter() {
+            document.getElementById('current-slide').textContent = currentSlide;
+            document.getElementById('total-slides').textContent = totalSlides;
+            
+            // Update URL hash for bookmarking
+            window.location.hash = `slide${currentSlide}`;
+        }
+        
+        // Navigate to a specific slide
+        function goToSlide(slideNumber) {
+            if (slideNumber < 1) slideNumber = 1;
+            if (slideNumber > totalSlides) slideNumber = totalSlides;
+            
+            currentSlide = slideNumber;
+            
+            // Scroll to the slide
+            const slideElement = document.getElementById(`slide${slideNumber}`);
+            if (slideElement) {
+                slideElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            
+            updateSlideCounter();
+        }
+        
+        // Next slide
+        document.getElementById('next-btn').addEventListener('click', () => {
+            goToSlide(currentSlide + 1);
+        });
+        
+        // Previous slide
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            goToSlide(currentSlide - 1);
+        });
+        
+        // Toggle view mode
+        document.getElementById('toggle-view').addEventListener('click', () => {
+            const slides = document.querySelectorAll('.slide');
+            const container = document.querySelector('.slides-container');
+            
+            if (container.classList.contains('grid-view')) {
+                // Switch back to normal view
+                container.classList.remove('grid-view');
+                slides.forEach(slide => {
+                    slide.style.maxWidth = '100%';
+                });
+                document.getElementById('toggle-view').innerHTML = '<i class="fas fa-expand"></i><span>Toggle View</span>';
+            } else {
+                // Switch to grid view
+                container.classList.add('grid-view');
+                slides.forEach(slide => {
+                    slide.style.maxWidth = '400px';
+                });
+                document.getElementById('toggle-view').innerHTML = '<i class="fas fa-compress"></i><span>Toggle View</span>';
+                
+                // Add grid view styles
+                if (!document.getElementById('grid-style')) {
+                    const style = document.createElement('style');
+                    style.id = 'grid-style';
+                    style.textContent = `
+                        .slides-container.grid-view {
+                            display: grid;
+                            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+                            gap: 20px;
+                        }
+                        
+                        .slides-container.grid-view .slide {
+                            height: 500px;
+                            overflow-y: auto;
+                        }
+                        
+                        @media (max-width: 900px) {
+                            .slides-container.grid-view {
+                                grid-template-columns: 1fr;
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'ArrowRight':
+                case ' ':
+                case 'PageDown':
+                    goToSlide(currentSlide + 1);
+                    e.preventDefault();
+                    break;
+                case 'ArrowLeft':
+                case 'PageUp':
+                    goToSlide(currentSlide - 1);
+                    e.preventDefault();
+                    break;
+                case 'Home':
+                    goToSlide(1);
+                    e.preventDefault();
+                    break;
+                case 'End':
+                    goToSlide(totalSlides);
+                    e.preventDefault();
+                    break;
+            }
+        });
+        
+        // Check URL hash on load
+        window.addEventListener('load', () => {
+            const hash = window.location.hash;
+            if (hash) {
+                const slideMatch = hash.match(/slide(\d+)/);
+                if (slideMatch) {
+                    const slideNum = parseInt(slideMatch[1]);
+                    if (slideNum >= 1 && slideNum <= totalSlides) {
+                        setTimeout(() => goToSlide(slideNum), 100);
+                    }
+                }
+            } else {
+                updateSlideCounter(); // Initialize counter
+            }
+            
+            // Initialize MathJax
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        });
+        
+        // Re-render MathJax when slides change
+        function renderMathJax() {
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
+        }
+        
+        // Add click handlers to slides for navigation (optional)
+        document.querySelectorAll('.slide').forEach((slide, index) => {
+            slide.addEventListener('dblclick', () => {
+                goToSlide(index + 1);
+            });
+        });
+    </script>
+</body>
+</html>
