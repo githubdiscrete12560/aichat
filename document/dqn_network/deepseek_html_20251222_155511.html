@@ -1,0 +1,2408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neural Networks: From Linear Layers to Hidden Units</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Code+Pro:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --accent: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background-color: #f5f7ff;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 1.5rem 0;
+            box-shadow: var(--box-shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .logo i {
+            font-size: 1.8rem;
+        }
+        
+        .nav-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .btn {
+            background-color: white;
+            color: var(--primary);
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:hover {
+            background-color: var(--light-gray);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .slide-indicator {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+        
+        /* Main content */
+        .main-content {
+            display: flex;
+            min-height: calc(100vh - 80px);
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background-color: white;
+            border-right: 1px solid var(--light-gray);
+            padding: 2rem 1rem;
+            overflow-y: auto;
+            position: sticky;
+            top: 80px;
+            height: calc(100vh - 80px);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .sidebar h3 {
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sidebar h3 i {
+            color: var(--accent);
+        }
+        
+        .sidebar-nav {
+            list-style: none;
+        }
+        
+        .sidebar-nav li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .sidebar-nav a {
+            display: block;
+            padding: 0.8rem 1rem;
+            border-radius: var(--border-radius);
+            color: var(--dark);
+            text-decoration: none;
+            transition: var(--transition);
+            border-left: 3px solid transparent;
+        }
+        
+        .sidebar-nav a:hover {
+            background-color: var(--light-gray);
+            border-left-color: var(--primary);
+        }
+        
+        .sidebar-nav a.active {
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+            border-left-color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .sidebar-nav .section-title {
+            font-weight: 600;
+            color: var(--secondary);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            padding-left: 1rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Slides container */
+        .slides-container {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        
+        .slide {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .slide.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light-gray);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .slide-title {
+            color: var(--primary);
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .slide-number {
+            background-color: var(--primary);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        
+        .slide-content {
+            font-size: 1.05rem;
+        }
+        
+        .slide-content h3 {
+            color: var(--secondary);
+            margin: 1.5rem 0 0.8rem;
+            font-size: 1.3rem;
+        }
+        
+        .slide-content h4 {
+            color: var(--dark);
+            margin: 1.2rem 0 0.6rem;
+            font-size: 1.1rem;
+        }
+        
+        .slide-content p {
+            margin-bottom: 1rem;
+        }
+        
+        .highlight {
+            background-color: rgba(67, 97, 238, 0.1);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--primary);
+            margin: 1.5rem 0;
+        }
+        
+        .code-block {
+            background-color: #1e1e1e;
+            color: #f8f8f2;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            font-family: 'Source Code Pro', monospace;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .code-block .code-keyword {
+            color: #569cd6;
+        }
+        
+        .code-block .code-function {
+            color: #dcdcaa;
+        }
+        
+        .code-block .code-var {
+            color: #9cdcfe;
+        }
+        
+        .code-block .code-number {
+            color: #b5cea8;
+        }
+        
+        .code-block .code-comment {
+            color: #6a9955;
+        }
+        
+        .math-equation {
+            background-color: var(--light-gray);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            margin: 1.5rem 0;
+            text-align: center;
+            font-family: 'Source Code Pro', monospace;
+            font-size: 1.1rem;
+            overflow-x: auto;
+        }
+        
+        .visualization {
+            background-color: #f8f9fa;
+            border: 1px solid var(--light-gray);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .visualization-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+            font-weight: 600;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        .comparison-table th {
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .comparison-table tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        .comparison-table .correct {
+            color: #28a745;
+            font-weight: 600;
+        }
+        
+        .comparison-table .incorrect {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        
+        .forward-backward-diagram {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 2rem 0;
+            padding: 2rem;
+            background: linear-gradient(to right, rgba(67, 97, 238, 0.05), rgba(114, 9, 183, 0.05));
+            border-radius: var(--border-radius);
+        }
+        
+        .forward-step, .backward-step {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .step-arrow {
+            font-size: 2rem;
+            color: var(--primary);
+            margin: 0 1rem;
+        }
+        
+        .step-title {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+        
+        .step-desc {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .key-insight {
+            background-color: rgba(247, 37, 133, 0.1);
+            border-left: 4px solid var(--accent);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            margin: 1.5rem 0;
+        }
+        
+        .key-insight h4 {
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 0;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .footer-logo {
+            font-weight: 700;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .copyright {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+        
+        .slide-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: static;
+                padding: 1.5rem;
+                border-right: none;
+                border-bottom: 1px solid var(--light-gray);
+            }
+            
+            .slides-container {
+                padding: 1.5rem;
+            }
+            
+            .forward-backward-diagram {
+                flex-direction: column;
+                gap: 2rem;
+            }
+            
+            .step-arrow {
+                transform: rotate(90deg);
+                margin: 1rem 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .slide {
+                padding: 1.5rem;
+            }
+            
+            .slide-title {
+                font-size: 1.5rem;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fas fa-brain"></i>
+                <span>Neural Networks Deep Dive</span>
+            </div>
+            <div class="nav-controls">
+                <button id="prevBtn" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Previous
+                </button>
+                <span id="slideIndicator" class="slide-indicator">Slide 1 of 32</span>
+                <button id="nextBtn" class="btn btn-secondary">
+                    Next <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <div class="main-content">
+        <aside class="sidebar">
+            <h3><i class="fas fa-list"></i> Presentation Outline</h3>
+            <ul class="sidebar-nav" id="sidebarNav">
+                <!-- Navigation will be populated by JavaScript -->
+            </ul>
+        </aside>
+        
+        <main class="slides-container">
+            <!-- Slide 1: Introduction -->
+            <div class="slide active" id="slide1">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-play-circle"></i> Introduction: nn.Linear(4, 2)</h1>
+                    <div class="slide-number">1</div>
+                </div>
+                <div class="slide-content">
+                    <p>This presentation dives deep into the mechanics of neural networks, starting from the fundamental building block: <strong>nn.Linear(4, 2)</strong>. We'll explore what happens from Python code to tensor operations, autograd, and C++ execution.</p>
+                    
+                    <div class="highlight">
+                        <h3>Key Concept</h3>
+                        <p><code>nn.Linear(4, 2)</code> defines a fully connected (dense) layer with:</p>
+                        <ul>
+                            <li><strong>Input size = 4</strong></li>
+                            <li><strong>Output size = 2</strong></li>
+                        </ul>
+                        <p>Mathematically represented as: <strong>y = Wx + b</strong></p>
+                        <p>Where W ∈ ℝ²ˣ⁴ and b ∈ ℝ²</p>
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h4><i class="fas fa-lightbulb"></i> Teaching Insight</h4>
+                        <p>You can explain <code>nn.Linear(4,2)</code> as:</p>
+                        <p><em>"A learnable function that maps a 4-dimensional meaning space into a 2-dimensional decision space."</em></p>
+                        <p>This analogy works beautifully for NLP embeddings, RL state → action, and human cognition models.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 2: Mathematical Representation -->
+            <div class="slide" id="slide2">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-square-root-alt"></i> Mathematical Representation</h1>
+                    <div class="slide-number">2</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Linear Transformation</h3>
+                    <p>The linear layer performs the operation:</p>
+                    
+                    <div class="math-equation">
+                        y = Wx + b
+                    </div>
+                    
+                    <p>Expanded for our specific case (4 inputs, 2 outputs):</p>
+                    
+                    <div class="math-equation">
+                        \begin{bmatrix} y_1 \\ y_2 \end{bmatrix} = 
+                        \begin{bmatrix} w_{11} & w_{12} & w_{13} & w_{14} \\ w_{21} & w_{22} & w_{23} & w_{24} \end{bmatrix}
+                        \begin{bmatrix} x_1 \\ x_2 \\ x_3 \\ x_4 \end{bmatrix} + 
+                        \begin{bmatrix} b_1 \\ b_2 \end{bmatrix}
+                    </div>
+                    
+                    <h3>What Happens in Python (torch.nn Layer)</h3>
+                    <p>When you write <code>model = nn.Linear(4, 2)</code>:</p>
+                    
+                    <div class="code-block">
+                        <span class="code-keyword">class</span> <span class="code-function">Linear</span>(Module):<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">def</span> <span class="code-function">__init__</span>(<span class="code-var">self</span>, in_features, out_features):<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-comment"># ... implementation</span>
+                    </div>
+                    
+                    <p>Python calls <code>Linear.__init__(4, 2)</code>, allocates a new Module object, and registers parameters.</p>
+                </div>
+            </div>
+            
+            <!-- Slide 3: Parameter Creation -->
+            <div class="slide" id="slide3">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-cogs"></i> Parameter Creation & Initialization</h1>
+                    <div class="slide-number">3</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Inside __init__</h3>
+                    <p>PyTorch creates:</p>
+                    
+                    <div class="code-block">
+                        <span class="code-var">self</span>.weight = nn.Parameter(torch.empty(<span class="code-number">2</span>, <span class="code-number">4</span>))<br>
+                        <span class="code-var">self</span>.bias = nn.Parameter(torch.empty(<span class="code-number">2</span>))
+                    </div>
+                    
+                    <div class="highlight">
+                        <h3>What is nn.Parameter?</h3>
+                        <ul>
+                            <li>A Tensor with <code>requires_grad=True</code></li>
+                            <li>Automatically registered inside the module</li>
+                            <li>This is how Autograd knows: "These tensors need gradients"</li>
+                        </ul>
+                    </div>
+                    
+                    <h3>Initialization (Calls Base torch Ops)</h3>
+                    <div class="code-block">
+                        nn.init.kaiming_uniform_(<span class="code-var">self</span>.weight)<br>
+                        nn.init.uniform_(<span class="code-var">self</span>.bias)
+                    </div>
+                    
+                    <p>At this moment:</p>
+                    <ul>
+                        <li>Memory is allocated (CPU by default)</li>
+                        <li>Values are written using optimized C++ code</li>
+                        <li>No computation graph yet (initialization ≠ forward pass)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Slide 4: Model Structure -->
+            <div class="slide" id="slide4">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-project-diagram"></i> Model Structure in Memory</h1>
+                    <div class="slide-number">4</div>
+                </div>
+                <div class="slide-content">
+                    <h3>After Initialization</h3>
+                    <p>After <code>model = nn.Linear(4, 2)</code> runs, you have:</p>
+                    
+                    <div class="visualization">
+                        <div class="visualization-header">
+                            <i class="fas fa-sitemap"></i> Model Structure
+                        </div>
+                        <ul>
+                            <li><strong>model</strong>
+                                <ul>
+                                    <li><strong>weight</strong>: Tensor(2×4, requires_grad=True)</li>
+                                    <li><strong>bias</strong>: Tensor(2, requires_grad=True)</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h4><i class="fas fa-exclamation-circle"></i> Important</h4>
+                        <p>No computation has happened yet. No graph exists yet.</p>
+                    </div>
+                    
+                    <h3>When Forward Pass Happens</h3>
+                    <p>When you call <code>y = model(x)</code>:</p>
+                    
+                    <div class="code-block">
+                        <span class="code-keyword">def</span> <span class="code-function">forward</span>(<span class="code-var">self</span>, input):<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="code-keyword">return</span> F.linear(input, <span class="code-var">self</span>.weight, <span class="code-var">self</span>.bias)
+                    </div>
+                    
+                    <p>Internally: <code>y = x @ weight.T + bias</code></p>
+                </div>
+            </div>
+            
+            <!-- Slide 5: Forward Pass -->
+            <div class="slide" id="slide5">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-forward"></i> Forward Pass & Autograd Graph</h1>
+                    <div class="slide-number">5</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Tensor Operations Trigger</h3>
+                    <p>Each operation:</p>
+                    <ol>
+                        <li>Creates a new tensor</li>
+                        <li>Registers an Autograd Function</li>
+                        <li>Stores references to parents (x, weight, bias)</li>
+                    </ol>
+                    
+                    <div class="forward-backward-diagram">
+                        <div class="forward-step">
+                            <div class="step-title">Forward Pass</div>
+                            <div class="step-desc">x → MatMul → Add → y</div>
+                        </div>
+                        <div class="step-arrow">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                        <div class="backward-step">
+                            <div class="step-title">Backward Pass</div>
+                            <div class="step-desc">loss → Chain Rule → Gradients</div>
+                        </div>
+                    </div>
+                    
+                    <h3>Autograd Builds the Dynamic Graph</h3>
+                    <p>At runtime, Autograd builds:</p>
+                    
+                    <div class="visualization">
+                        <div class="visualization-header">
+                            <i class="fas fa-network-wired"></i> Computation Graph
+                        </div>
+                        <p><strong>x</strong> → MatMul → Add → <strong>y</strong></p>
+                        <p><strong>W</strong> ↗</p>
+                        <p><strong>b</strong> ↗</p>
+                    </div>
+                    
+                    <p>Each node stores:</p>
+                    <ul>
+                        <li>Forward result</li>
+                        <li>Backward function</li>
+                        <li>Pointers to previous tensors</li>
+                    </ul>
+                    
+                    <p><em>This graph exists only for this forward pass.</em></p>
+                </div>
+            </div>
+            
+            <!-- Slide 6: Backward Pass -->
+            <div class="slide" id="slide6">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-backward"></i> Backward Pass & Gradient Computation</h1>
+                    <div class="slide-number">6</div>
+                </div>
+                <div class="slide-content">
+                    <h3>When you call loss.backward()</h3>
+                    <p>Autograd:</p>
+                    <ol>
+                        <li>Starts from loss</li>
+                        <li>Applies chain rule backward</li>
+                        <li>Computes gradients for all parameters</li>
+                    </ol>
+                    
+                    <div class="math-equation">
+                        ∇W = ∂L/∂W, ∇b = ∂L/∂b, ∇x = ∂L/∂x
+                    </div>
+                    
+                    <p>These gradients are stored as:</p>
+                    <div class="code-block">
+                        model.weight.grad<br>
+                        model.bias.grad
+                    </div>
+                    
+                    <h3>How Optimizer Uses This</h3>
+                    <p>When you call <code>optimizer.step()</code>:</p>
+                    
+                    <div class="code-block">
+                        <span class="code-comment"># Optimizer reads weight.grad, bias.grad</span><br>
+                        <span class="code-comment"># Applies update rule:</span><br>
+                        W := W - η∇W
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h4><i class="fas fa-robot"></i> Optimizer Note</h4>
+                        <p>The optimizer does not know math. It only knows how to update numbers based on gradients and learning rate.</p>
+                    </div>
+                    
+                    <h3>Dispatcher → Backend (CPU/GPU)</h3>
+                    <p>During forward & backward:</p>
+                    <ul>
+                        <li>Torch Dispatcher checks device</li>
+                        <li>Routes operations to CPU kernel (MKL) or CUDA kernel (GPU)</li>
+                        <li>Python just triggers this process</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Slide 7: Why nn.Linear is Elegant -->
+            <div class="slide" id="slide7">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-star"></i> Why nn.Linear is Elegant</h1>
+                    <div class="slide-number">7</div>
+                </div>
+                <div class="slide-content">
+                    <h3>What You Get Automatically</h3>
+                    <ul>
+                        <li>Automatic parameter tracking</li>
+                        <li>Automatic gradient computation</li>
+                        <li>Optimized execution (CPU/GPU)</li>
+                        <li>Clean math abstraction</li>
+                    </ul>
+                    
+                    <div class="highlight">
+                        <h3>PyTorch's Magic</h3>
+                        <p>You write: <code>model(x)</code></p>
+                        <p>PyTorch does:</p>
+                        <ul>
+                            <li>Graph creation</li>
+                            <li>Kernel dispatch</li>
+                            <li>Gradient propagation</li>
+                            <li>Memory management</li>
+                        </ul>
+                    </div>
+                    
+                    <h3>Final Mental Model</h3>
+                    
+                    <div class="visualization">
+                        <div class="visualization-header">
+                            <i class="fas fa-mind-share"></i> Mental Model Flow
+                        </div>
+                        <p>nn.Linear ↓</p>
+                        <p>Parameters (W, b) ↓</p>
+                        <p>Tensor ops (matmul + add) ↓</p>
+                        <p>Autograd graph ↓</p>
+                        <p>Backward gradients ↓</p>
+                        <p>Optimizer update</p>
+                    </div>
+                    
+                    <p>Now let's examine a concrete example with real numbers...</p>
+                </div>
+            </div>
+            
+            <!-- Slide 8: Concrete Example - Setup -->
+            <div class="slide" id="slide8">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-calculator"></i> Concrete Example: Setup</h1>
+                    <div class="slide-number">8</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Model with Fixed Numbers</h3>
+                    <p>One linear layer: <strong>y = Wx + b</strong></p>
+                    
+                    <h4>Weights (W) - Shape (2 × 4)</h4>
+                    <div class="math-equation">
+                        W = \begin{bmatrix} 0.10 & -0.20 & 0.30 & 0.40 \\ -0.50 & 0.20 & 0.10 & -0.30 \end{bmatrix}
+                    </div>
+                    
+                    <h4>Bias (b) - Shape (2)</h4>
+                    <div class="math-equation">
+                        b = \begin{bmatrix} 0.01 \\ -0.02 \end{bmatrix}
+                    </div>
+                    
+                    <h4>Input (One Sample)</h4>
+                    <div class="math-equation">
+                        x = \begin{bmatrix} 1.0 \\ 2.0 \\ -1.0 \\ 0.5 \end{bmatrix}
+                    </div>
+                    
+                    <h3>Shapes</h3>
+                    <ul>
+                        <li><strong>x</strong>: (4,)</li>
+                        <li><strong>W</strong>: (2, 4)</li>
+                        <li><strong>b</strong>: (2,)</li>
+                    </ul>
+                    
+                    <p>Now let's compute the forward pass step by step...</p>
+                </div>
+            </div>
+            
+            <!-- Slide 9: Concrete Example - Forward Pass -->
+            <div class="slide" id="slide9">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-forward"></i> Concrete Example: Forward Pass</h1>
+                    <div class="slide-number">9</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Step 1: Matrix Multiplication</h3>
+                    
+                    <div class="math-equation">
+                        Wx = \begin{bmatrix} 
+                        0.10(1.0) + (-0.20)(2.0) + 0.30(-1.0) + 0.40(0.5) \\
+                        -0.50(1.0) + 0.20(2.0) + 0.10(-1.0) + (-0.30)(0.5)
+                        \end{bmatrix}
+                    </div>
+                    
+                    <h4>Compute:</h4>
+                    <ul>
+                        <li><strong>First output</strong>: 0.10 - 0.40 - 0.30 + 0.20 = -0.40</li>
+                        <li><strong>Second output</strong>: -0.50 + 0.40 - 0.10 - 0.15 = -0.35</li>
+                    </ul>
+                    
+                    <div class="math-equation">
+                        Wx = \begin{bmatrix} -0.40 \\ -0.35 \end{bmatrix}
+                    </div>
+                    
+                    <h3>Step 2: Add Bias</h3>
+                    
+                    <div class="math-equation">
+                        y = Wx + b = \begin{bmatrix} -0.40 + 0.01 \\ -0.35 - 0.02 \end{bmatrix} = \begin{bmatrix} -0.39 \\ -0.37 \end{bmatrix}
+                    </div>
+                    
+                    <div class="highlight">
+                        <h3>Model Output</h3>
+                        <div class="math-equation">
+                            y = \begin{bmatrix} -0.39 \\ -0.37 \end{bmatrix}
+                        </div>
+                    </div>
+                    
+                    <p>This is the model output from the forward pass.</p>
+                </div>
+            </div>
+            
+            <!-- Slide 10: Loss Calculation -->
+            <div class="slide" id="slide10">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-chart-line"></i> Loss Calculation</h1>
+                    <div class="slide-number">10</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Define Loss Function</h3>
+                    <p>We'll use Mean Squared Error (MSE):</p>
+                    
+                    <div class="math-equation">
+                        L = \frac{1}{2} \sum (y - t)^2
+                    </div>
+                    
+                    <h4>Target</h4>
+                    <div class="math-equation">
+                        t = \begin{bmatrix} 0.0 \\ 1.0 \end{bmatrix}
+                    </div>
+                    
+                    <h3>Step 3: Compute Error</h3>
+                    
+                    <div class="math-equation">
+                        y - t = \begin{bmatrix} -0.39 - 0.0 \\ -0.37 - 1.0 \end{bmatrix} = \begin{bmatrix} -0.39 \\ -1.37 \end{bmatrix}
+                    </div>
+                    
+                    <h3>Step 4: Square & Average</h3>
+                    
+                    <div class="math-equation">
+                        L = \frac{1}{2} \left( (-0.39)^2 + (-1.37)^2 \right)
+                    </div>
+                    
+                    <div class="math-equation">
+                        L = \frac{1}{2} (0.1521 + 1.8769) = \frac{1}{2} (2.029) = 1.0145
+                    </div>
+                    
+                    <div class="highlight">
+                        <h3>Loss = 1.0145</h3>
+                    </div>
+                    
+                    <p>Now we need to compute gradients through backpropagation...</p>
+                </div>
+            </div>
+            
+            <!-- Slide 11: Backward Pass - Gradients -->
+            <div class="slide" id="slide11">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-backward"></i> Backward Pass: Gradient Computation</h1>
+                    <div class="slide-number">11</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Calling loss.backward()</h3>
+                    <p>Autograd applies the <strong>chain rule</strong>.</p>
+                    
+                    <h4>Gradient w.r.t Output (y)</h4>
+                    <p>For MSE: ∂L/∂y = y - t</p>
+                    
+                    <div class="math-equation">
+                        ∂L/∂y = \begin{bmatrix} -0.39 \\ -1.37 \end{bmatrix}
+                    </div>
+                    
+                    <p>This is the <strong>error signal</strong>.</p>
+                    
+                    <h4>Gradient w.r.t Bias (b)</h4>
+                    <p>∂L/∂b = ∂L/∂y</p>
+                    
+                    <div class="math-equation">
+                        ∇b = \begin{bmatrix} -0.39 \\ -1.37 \end{bmatrix}
+                    </div>
+                    
+                    <p>This becomes: <code>model.bias.grad</code></p>
+                    
+                    <h4>Gradient w.r.t Weights (W)</h4>
+                    <p>Rule: ∂L/∂W_ij = ∂L/∂y_i ⋅ x_j</p>
+                    
+                    <p><strong>First neuron gradients:</strong></p>
+                    <div class="math-equation">
+                        ∇W_1 = -0.39 ⋅ \begin{bmatrix} 1.0 & 2.0 & -1.0 & 0.5 \end{bmatrix} = \begin{bmatrix} -0.39 & -0.78 & 0.39 & -0.195 \end{bmatrix}
+                    </div>
+                    
+                    <p><strong>Second neuron gradients:</strong></p>
+                    <div class="math-equation">
+                        ∇W_2 = -1.37 ⋅ \begin{bmatrix} 1.0 & 2.0 & -1.0 & 0.5 \end{bmatrix} = \begin{bmatrix} -1.37 & -2.74 & 1.37 & -0.685 \end{bmatrix}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 12: Weight Gradient & Update -->
+            <div class="slide" id="slide12">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-sync-alt"></i> Weight Gradient & Update</h1>
+                    <div class="slide-number">12</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Complete Weight Gradient</h3>
+                    
+                    <div class="math-equation">
+                        ∇W = \begin{bmatrix} 
+                        -0.39 & -0.78 & 0.39 & -0.195 \\
+                        -1.37 & -2.74 & 1.37 & -0.685
+                        \end{bmatrix}
+                    </div>
+                    
+                    <p>This becomes: <code>model.weight.grad</code></p>
+                    
+                    <h3>Optimizer Step (SGD Example)</h3>
+                    <p>Learning rate: η = 0.1</p>
+                    
+                    <div class="math-equation">
+                        Weight update rule: W := W - η∇W
+                    </div>
+                    
+                    <h4>Example Updates:</h4>
+                    <ul>
+                        <li><strong>W₁₁</strong>: 0.10 - 0.1(-0.39) = 0.139</li>
+                        <li><strong>b₁</strong>: 0.01 - 0.1(-0.39) = 0.049</li>
+                    </ul>
+                    
+                    <p>All parameters update numerically like this.</p>
+                    
+                    <div class="highlight">
+                        <h3>What PyTorch Does Automatically</h3>
+                        <p><strong>You manually computed:</strong></p>
+                        <ul>
+                            <li>Forward math</li>
+                            <li>Loss</li>
+                            <li>Gradients</li>
+                            <li>Updates</li>
+                        </ul>
+                        <p><strong>PyTorch does all this automatically when you call:</strong></p>
+                        <div class="code-block">
+                            loss.backward()<br>
+                            optimizer.step()
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 13: Teaching Insight -->
+            <div class="slide" id="slide13">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-chalkboard-teacher"></i> Key Teaching Insight</h1>
+                    <div class="slide-number">13</div>
+                </div>
+                <div class="slide-content">
+                    <div class="key-insight">
+                        <h4><i class="fas fa-lightbulb"></i> Core Learning Principle</h4>
+                        <p><strong>"Each output neuron sends an error signal backward. Each weight is adjusted in proportion to (error × input)."</strong></p>
+                        <p>That's the entire logic of learning in neural networks.</p>
+                    </div>
+                    
+                    <h3>Important Distinction</h3>
+                    <p><code>nn.Linear(4, 2)</code> by itself is <strong>not</strong> a multilayer neural network.</p>
+                    <p>It is a <strong>single-layer perceptron</strong> (more precisely: a linear model with 2 output neurons).</p>
+                    
+                    <div class="visualization">
+                        <div class="visualization-header">
+                            <i class="fas fa-project-diagram"></i> Architecture Comparison
+                        </div>
+                        <p><strong>nn.Linear(4, 2)</strong> → Linear model (no activation, no hidden layer)</p>
+                        <p><strong>nn.Linear(4, 2) + nn.ReLU()</strong> → Single-layer perceptron (with activation)</p>
+                        <p><strong>nn.Linear(4, 3) → nn.ReLU() → nn.Linear(3, 2)</strong> → Neural network with hidden layer</p>
+                    </div>
+                    
+                    <p>Let's explore why hidden layers matter...</p>
+                </div>
+            </div>
+            
+            <!-- Slide 14: Is This a Perceptron? -->
+            <div class="slide" id="slide14">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-question-circle"></i> Is This a Perceptron?</h1>
+                    <div class="slide-number">14</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Classic Definition (Historical)</h3>
+                    <p>A perceptron is: <strong>y = f(Wx + b)</strong></p>
+                    <p>Where <strong>f</strong> is a step/sign function (originally).</p>
+                    
+                    <h3>PyTorch Version</h3>
+                    <p><code>nn.Linear(4, 2)</code> implements: <strong>y = Wx + b</strong></p>
+                    
+                    <ul>
+                        <li>There is <strong>no activation function</strong></li>
+                        <li>There is <strong>no hidden layer</strong></li>
+                    </ul>
+                    
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Model Type</th>
+                                <th>Characteristics</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="correct">✔ A linear model</span></td>
+                                <td>Direct linear transformation</td>
+                            </tr>
+                            <tr>
+                                <td><span class="correct">✔ A single-layer perceptron (with activation)</span></td>
+                                <td>Add activation function</td>
+                            </tr>
+                            <tr>
+                                <td><span class="incorrect">✕ Not a deep neural network</span></td>
+                                <td>No hidden layers</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h3>Adding Activation</h3>
+                    <div class="code-block">
+                        nn.Sequential(<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;nn.Linear(4, 2),<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;nn.ReLU()<br>
+                        )
+                    </div>
+                    
+                    <p>This becomes a perceptron with activation, still no hidden layer.</p>
+                </div>
+            </div>
+            
+            <!-- Slide 15: Why No Hidden Layer -->
+            <div class="slide" id="slide15">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-layer-group"></i> Why This Model Has No Hidden Layer</h1>
+                    <div class="slide-number">15</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Conceptual Diagram</h3>
+                    
+                    <div class="visualization">
+                        <div class="visualization-header">
+                            <i class="fas fa-project-diagram"></i> Direct Connections
+                        </div>
+                        <p><strong>x₁ → y₁</strong></p>
+                        <p><strong>x₂ → y₂</strong></p>
+                        <p><strong>x₃ → Both outputs</strong></p>
+                        <p><strong>x₄ → Both outputs</strong></p>
+                    </div>
+                    
+                    <p>Every input connects directly to the output.</p>
+                    
+                    <div class="highlight">
+                        <h3>What's Missing?</h3>
+                        <ul>
+                            <li>No intermediate representation</li>
+                            <li>No feature transformation</li>
+                            <li>No abstraction step</li>
+                        </ul>
+                        <p><strong>This model can only learn linear decision boundaries.</strong></p>
+                    </div>
+                    
+                    <h3>What Is a Hidden Layer?</h3>
+                    <p>A hidden layer is a layer that:</p>
+                    <ul>
+                        <li>Is not directly observed</li>
+                        <li>Exists between input and output</li>
+                        <li>Learns an internal representation</li>
+                    </ul>
+                    
+                    <div class="math-equation">
+                        \begin{aligned}
+                        h &= f(W_1 x + b_1) \\
+                        y &= W_2 h + b_2
+                        \end{aligned}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 16: One Hidden Layer Case -->
+            <div class="slide" id="slide16">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-layer-group"></i> One Hidden Layer Case</h1>
+                    <div class="slide-number">16</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Proper Neural Network</h3>
+                    
+                    <div class="code-block">
+                        model = nn.Sequential(<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;nn.Linear(4, 3),  <span class="code-comment"># hidden layer</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;nn.ReLU(),        <span class="code-comment"># non-linearity</span><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;nn.Linear(3, 2)   <span class="code-comment"># output layer</span><br>
+                        )
+                    </div>
+                    
+                    <h3>Dimensions</h3>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Layer</th>
+                                <th>Shape</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Input</td>
+                                <td>4</td>
+                            </tr>
+                            <tr>
+                                <td>Hidden</td>
+                                <td>3</td>
+                            </tr>
+                            <tr>
+                                <td>Output</td>
+                                <td>2</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h3>Forward Pass with Hidden Layer</h3>
+                    
+                    <h4>Step 1: Hidden layer computation</h4>
+                    <div class="math-equation">
+                        h = \text{ReLU}(W_1 x + b_1)
+                    </div>
+                    
+                    <p>Where:</p>
+                    <ul>
+                        <li>W₁ ∈ ℝ³ˣ⁴</li>
+                        <li>b₁ ∈ ℝ³</li>
+                    </ul>
+                    
+                    <h4>Step 2: Output layer</h4>
+                    <div class="math-equation">
+                        y = W_2 h + b_2
+                    </div>
+                    
+                    <p>Where:</p>
+                    <ul>
+                        <li>W₂ ∈ ℝ²ˣ³</li>
+                    </ul>
+                    
+                    <p>These hidden neurons produce <strong>learned features</strong>.</p>
+                </div>
+            </div>
+            
+            <!-- Slide 17: Why Activation Is Mandatory -->
+            <div class="slide" id="slide17">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-bolt"></i> Why Activation Is Mandatory</h1>
+                    <div class="slide-number">17</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Without Activation</h3>
+                    
+                    <div class="code-block">
+                        nn.Linear(4, 3)<br>
+                        nn.Linear(3, 2)
+                    </div>
+                    
+                    <p>This collapses into one linear layer:</p>
+                    
+                    <div class="math-equation">
+                        W_2(W_1 x) = (W_2 W_1)x
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h4><i class="fas fa-exclamation-triangle"></i> Critical Insight</h4>
+                        <p><strong>Hidden layers only matter if there is a non-linear activation.</strong></p>
+                        <p>Without activation, you get:</p>
+                        <ul>
+                            <li>No extra power</li>
+                            <li>No non-linearity</li>
+                            <li>No deep learning</li>
+                        </ul>
+                    </div>
+                    
+                    <h3>Backpropagation with a Hidden Layer</h3>
+                    <p>Gradients now flow in two stages:</p>
+                    
+                    <div class="visualization">
+                        <div class="visualization-header">
+                            <i class="fas fa-water"></i> Gradient Flow
+                        </div>
+                        <p>Loss ↓</p>
+                        <p>Output layer gradients ↓</p>
+                        <p>Hidden layer gradients ↓</p>
+                        <p>Input</p>
+                    </div>
+                    
+                    <p>Each hidden neuron:</p>
+                    <ul>
+                        <li>Receives credit or blame</li>
+                        <li>Adjusts weights based on its contribution</li>
+                    </ul>
+                    
+                    <p>This is the <strong>credit assignment problem</strong> — solved by backpropagation.</p>
+                </div>
+            </div>
+            
+            <!-- Slide 18: Geometric Interpretation -->
+            <div class="slide" id="slide18">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-shapes"></i> Geometric Interpretation</h1>
+                    <div class="slide-number">18</div>
+                </div>
+                <div class="slide-content">
+                    <h3>No Hidden Layer</h3>
+                    <ul>
+                        <li>Can only draw <strong>straight lines / planes</strong></li>
+                        <li>Linear separability only</li>
+                    </ul>
+                    
+                    <h3>With Hidden Layer + ReLU</h3>
+                    <ul>
+                        <li>Can form <strong>piecewise linear surfaces</strong></li>
+                        <li>Can approximate curves</li>
+                        <li>Can model compositional structure</li>
+                    </ul>
+                    
+                    <div class="highlight">
+                        <h3>This is why:</h3>
+                        <ul>
+                            <li><strong>XOR is impossible</strong> for perceptron</li>
+                            <li><strong>XOR is trivial</strong> with 1 hidden layer</li>
+                        </ul>
+                    </div>
+                    
+                    <h3>Cognitive / Language Learning Analogy</h3>
+                    
+                    <div class="visualization">
+                        <div class="visualization-header">
+                            <i class="fas fa-brain"></i> Learning Analogy
+                        </div>
+                        <h4>No hidden layer</h4>
+                        <p><em>"Direct stimulus → response"</em></p>
+                        
+                        <h4>Hidden layer</h4>
+                        <p><em>"Stimulus → internal representation → response"</em></p>
+                    </div>
+                    
+                    <p><strong>Examples:</strong></p>
+                    <ul>
+                        <li>Phonemes → words → meaning</li>
+                        <li>Visual edges → shapes → objects</li>
+                        <li>State → latent features → action</li>
+                    </ul>
+                    
+                    <div class="key-insight">
+                        <h4><i class="fas fa-lightbulb"></i> Teaching Insight</h4>
+                        <p><strong>Hidden layers are where understanding lives.</strong></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 19: Summary Table -->
+            <div class="slide" id="slide19">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-table"></i> Model Type Summary</h1>
+                    <div class="slide-number">19</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Core Conceptual Distinction</h3>
+                    <p>This is a core conceptual question in neural networks, and it's exactly the right thing for a 3rd-year undergraduate to understand deeply.</p>
+                    
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Model</th>
+                                <th>Type</th>
+                                <th>Capabilities</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>nn.Linear(4,2)</code></td>
+                                <td>Linear model / perceptron (no hidden layer)</td>
+                                <td>Linear transformations only</td>
+                            </tr>
+                            <tr>
+                                <td>Linear + activation</td>
+                                <td>Single-layer perceptron</td>
+                                <td>Non-linear decision boundaries</td>
+                            </tr>
+                            <tr>
+                                <td>Linear → ReLU → Linear</td>
+                                <td>Neural network with hidden layer</td>
+                                <td>Can learn complex patterns</td>
+                            </tr>
+                            <tr>
+                                <td>Multiple hidden layers</td>
+                                <td>Deep neural network</td>
+                                <td>Hierarchical feature learning</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h3>When Are Hidden Layers Required?</h3>
+                    <p><strong>Short answer (exam-ready):</strong></p>
+                    
+                    <div class="highlight">
+                        <p><strong>"Hidden layers are required when the relationship between input and output is non-linear and cannot be represented by a single linear transformation."</strong></p>
+                    </div>
+                    
+                    <p>Now let's unpack what this really means...</p>
+                </div>
+            </div>
+            
+            <!-- Slide 20: What Networks Without Hidden Layers Can Do -->
+            <div class="slide" id="slide20">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-chart-line"></i> Networks Without Hidden Layers</h1>
+                    <div class="slide-number">20</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Input → Linear → Output</h3>
+                    
+                    <div class="math-equation">
+                        y = Wx + b
+                    </div>
+                    
+                    <p>This is a linear model, even if:</p>
+                    <ul>
+                        <li>You have many outputs</li>
+                        <li>You have many inputs</li>
+                        <li>You train it very well</li>
+                    </ul>
+                    
+                    <h3>Geometric Meaning</h3>
+                    <ul>
+                        <li><strong>Binary classification</strong> → straight line (2D), plane (3D), hyperplane (nD)</li>
+                        <li><strong>Regression</strong> → linear surface</li>
+                    </ul>
+                    
+                    <h3>Examples It Can Solve</h3>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Task</th>
+                                <th>Why It Works</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="correct">✔ Spam vs non-spam</span></td>
+                                <td>Linearly separable features</td>
+                            </tr>
+                            <tr>
+                                <td><span class="correct">✔ Predicting score from hours studied</span></td>
+                                <td>Roughly linear relationship</td>
+                            </tr>
+                            <tr>
+                                <td><span class="correct">✔ Simple threshold decisions</span></td>
+                                <td>Linear separation possible</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h3>Examples It CANNOT Solve</h3>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Task</th>
+                                <th>Why It Fails</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="incorrect">✕ XOR</span></td>
+                                <td>Not linearly separable</td>
+                            </tr>
+                            <tr>
+                                <td><span class="incorrect">✕ Curved decision boundaries</span></td>
+                                <td>Requires non-linearity</td>
+                            </tr>
+                            <tr>
+                                <td><span class="incorrect">✕ Hierarchical patterns</span></td>
+                                <td>Requires feature composition</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Slide 21: Why Hidden Layers Change Everything -->
+            <div class="slide" id="slide21">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-exchange-alt"></i> Why Hidden Layers Change Everything</h1>
+                    <div class="slide-number">21</div>
+                </div>
+                <div class="slide-content">
+                    <h3>A hidden layer introduces two critical things:</h3>
+                    
+                    <div class="visualization">
+                        <div class="visualization-header">
+                            <i class="fas fa-bullseye"></i> Intermediate Representation
+                        </div>
+                        <p><strong>x → h → y</strong></p>
+                        <p>The model no longer maps input directly to output.</p>
+                    </div>
+                    
+                    <h3>1. Intermediate Representation</h3>
+                    <p>The hidden layer <strong>h</strong> learns an internal representation of the input.</p>
+                    
+                    <h3>2. Non-linearity (This is Essential)</h3>
+                    
+                    <div class="math-equation">
+                        h = f(W_1 x + b_1)
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h4><i class="fas fa-exclamation-circle"></i> The Key Rule (Very Important)</h4>
+                        <p><strong>Hidden layers are only useful if they include a non-linear activation function.</strong></p>
+                    </div>
+                    
+                    <h3>Why?</h3>
+                    <p>Because:</p>
+                    
+                    <div class="math-equation">
+                        W_2(W_1 x) = (W_2 W_1)x
+                    </div>
+                    
+                    <p>Two linear layers collapse into one linear layer.</p>
+                    
+                    <p><strong>So this:</strong></p>
+                    <p>Input → Linear → Linear → Output</p>
+                    
+                    <p><strong>is mathematically equivalent to:</strong></p>
+                    <p>Input → Linear → Output</p>
+                </div>
+            </div>
+            
+            <!-- Slide 22: The XOR Example -->
+            <div class="slide" id="slide22">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-times-circle"></i> The XOR Example (Canonical Case)</h1>
+                    <div class="slide-number">22</div>
+                </div>
+                <div class="slide-content">
+                    <h3>XOR Truth Table</h3>
+                    
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>x₁</th>
+                                <th>x₂</th>
+                                <th>y</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                            </tr>
+                            <tr>
+                                <td>0</td>
+                                <td>1</td>
+                                <td>1</td>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>0</td>
+                                <td>1</td>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>1</td>
+                                <td>0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h3>Why No Hidden Layer Fails</h3>
+                    <ul>
+                        <li>No single straight line can separate the classes</li>
+                        <li>This is <strong>provably impossible</strong> for a perceptron</li>
+                    </ul>
+                    
+                    <div class="visualization">
+                        <div class="visualization-header">
+                            <i class="fas fa-chart-scatter"></i> XOR Visualization
+                        </div>
+                        <p>Points at (0,0) and (1,1) are class 0</p>
+                        <p>Points at (0,1) and (1,0) are class 1</p>
+                        <p>No straight line can separate them</p>
+                    </div>
+                    
+                    <h3>With One Hidden Layer</h3>
+                    <ul>
+                        <li>Hidden neurons learn intermediate concepts:
+                            <ul>
+                                <li>"x₁ OR x₂"</li>
+                                <li>"x₁ AND x₂"</li>
+                            </ul>
+                        </li>
+                        <li>Output combines them non-linearly</li>
+                    </ul>
+                    
+                    <div class="highlight">
+                        <h3>Problem solved!</h3>
+                        <p><strong>Conclusion:</strong> If your data looks like XOR (even in high dimensions), you need hidden layers.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 23: Functional Perspective -->
+            <div class="slide" id="slide23">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-function"></i> Functional Perspective</h1>
+                    <div class="slide-number">23</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Without Hidden Layers</h3>
+                    <p>You can model:</p>
+                    
+                    <div class="math-equation">
+                        y = a_1 x_1 + a_2 x_2 + \dots + b
+                    </div>
+                    
+                    <p>Only <strong>linear combinations</strong> of inputs.</p>
+                    
+                    <h3>With Hidden Layers</h3>
+                    <p>You can model:</p>
+                    
+                    <div class="math-equation">
+                        y = f(f(f(x)))
+                    </div>
+                    
+                    <p>This allows:</p>
+                    <ul>
+                        <li>Curves</li>
+                        <li>Corners</li>
+                        <li>Discontinuities</li>
+                        <li>Piecewise linear functions</li>
+                    </ul>
+                    
+                    <div class="highlight">
+                        <h3>This is why hidden layers enable function approximation.</h3>
+                    </div>
+                    
+                    <h3>Universal Approximation Insight</h3>
+                    <p>A neural network with at least one hidden layer and a non-linear activation can approximate <strong>any continuous function</strong> (given enough neurons).</p>
+                    
+                    <div class="key-insight">
+                        <h4><i class="fas fa-expand-arrows-alt"></i> Key Insight</h4>
+                        <ul>
+                            <li>Hidden layers are the <strong>source of expressive power</strong></li>
+                            <li>Depth controls <strong>how efficiently</strong> this power is used</li>
+                        </ul>
+                    </div>
+                    
+                    <h3>Representation Learning View (Modern Perspective)</h3>
+                    <p>Hidden layers are required when:</p>
+                    <p><strong>The problem requires learning features, not just combining given ones.</strong></p>
+                </div>
+            </div>
+            
+            <!-- Slide 24: Task Comparison -->
+            <div class="slide" id="slide24">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-tasks"></i> Task Comparison</h1>
+                    <div class="slide-number">24</div>
+                </div>
+                <div class="slide-content">
+                    <h3>When Are Hidden Layers Needed?</h3>
+                    
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Task</th>
+                                <th>Hidden Layer Needed?</th>
+                                <th>Why</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Linear regression</td>
+                                <td><span class="incorrect">✕</span></td>
+                                <td>No feature transformation needed</td>
+                            </tr>
+                            <tr>
+                                <td>XOR</td>
+                                <td><span class="correct">✓</span></td>
+                                <td>Needs intermediate logic gates</td>
+                            </tr>
+                            <tr>
+                                <td>Image recognition</td>
+                                <td><span class="correct">✓</span></td>
+                                <td>Edges → shapes → objects (hierarchy)</td>
+                            </tr>
+                            <tr>
+                                <td>Language modeling</td>
+                                <td><span class="correct">✓</span></td>
+                                <td>Characters → words → meaning</td>
+                            </tr>
+                            <tr>
+                                <td>Reinforcement learning</td>
+                                <td><span class="correct">✓</span></td>
+                                <td>State → abstract value estimation</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h3>Credit Assignment Problem</h3>
+                    <div class="visualization">
+                        <div class="visualization-header">
+                            <i class="fas fa-share-alt"></i> Credit Assignment
+                        </div>
+                        <h4>Without hidden layers:</h4>
+                        <p>Only outputs receive feedback</p>
+                        
+                        <h4>With hidden layers:</h4>
+                        <ul>
+                            <li>Internal units receive partial credit/blame</li>
+                            <li>Backpropagation distributes responsibility</li>
+                        </ul>
+                    </div>
+                    
+                    <p><strong>This is how internal concepts are learned.</strong></p>
+                </div>
+            </div>
+            
+            <!-- Slide 25: Decision Boundary Intuition -->
+            <div class="slide" id="slide25">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-draw-polygon"></i> Decision Boundary Intuition</h1>
+                    <div class="slide-number">25</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Teaching-Friendly Visualization</h3>
+                    
+                    <div class="visualization">
+                        <div class="visualization-header">
+                            <i class="fas fa-chart-line"></i> Decision Boundaries
+                        </div>
+                        
+                        <h4>No hidden layer</h4>
+                        <p>____________ (Straight line)</p>
+                        <p><em>Can only separate with straight lines</em></p>
+                        
+                        <h4>One hidden layer (ReLU)</h4>
+                        <p>__/‾‾‾\_ (Piecewise linear)</p>
+                        <p><em>Can create corners and bends</em></p>
+                        
+                        <h4>Multiple hidden layers</h4>
+                        <p>Complex, curved surfaces</p>
+                        <p><em>Can model intricate patterns</em></p>
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h4><i class="fas fa-puzzle-piece"></i> Key Insight</h4>
+                        <p><strong>Hidden layers allow composition of simple decisions into complex ones.</strong></p>
+                    </div>
+                    
+                    <h3>Practical Rule of Thumb (Students Love This)</h3>
+                    
+                    <p><strong>Hidden layers are required when any of the following are true:</strong></p>
+                    <ul>
+                        <li><span class="correct">✔</span> Data is not linearly separable</li>
+                        <li><span class="correct">✔</span> The relationship is curved or hierarchical</li>
+                        <li><span class="correct">✔</span> You need feature learning</li>
+                        <li><span class="correct">✔</span> XOR-like interactions exist</li>
+                        <li><span class="correct">✔</span> Human-level abstraction is needed</li>
+                    </ul>
+                    
+                    <p><strong>Hidden layers are not required when:</strong></p>
+                    <ul>
+                        <li><span class="incorrect">✗</span> The relationship is purely linear</li>
+                        <li><span class="incorrect">✗</span> Features already encode the solution</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Slide 26: How Many Hidden Neurons? -->
+            <div class="slide" id="slide26">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-sort-amount-up"></i> How Many Hidden Neurons?</h1>
+                    <div class="slide-number">26</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Short Answer</h3>
+                    <p><strong>Yes</strong> — for the XOR-type problem, one hidden layer with 2 neurons is sufficient and is the minimal correct design.</p>
+                    <p><strong>But no</strong> — this is not a universal rule for all problems.</p>
+                    
+                    <h3>In This Specific Context (XOR)</h3>
+                    <p>For the classic XOR problem:</p>
+                    <ul>
+                        <li>Inputs: (x₁, x₂ ∈ {0, 1})</li>
+                        <li>Output: XOR</li>
+                    </ul>
+                    
+                    <p>A network with:</p>
+                    <ul>
+                        <li><strong>1 hidden layer</strong></li>
+                        <li><strong>2 hidden neurons</strong></li>
+                        <li><strong>non-linear activation</strong></li>
+                    </ul>
+                    
+                    <p>is the smallest network that can solve XOR.</p>
+                    
+                    <div class="highlight">
+                        <h3>This is not a coincidence — it's a theoretical minimum.</h3>
+                    </div>
+                    
+                    <h3>Why Exactly 2 Hidden Neurons?</h3>
+                    
+                    <div class="visualization">
+                        <div class="visualization-header">
+                            <i class="fas fa-th-large"></i> Geometric Intuition (Very Important)
+                        </div>
+                        <p>XOR data in 2D:</p>
+                        <p>(0,1) • &nbsp;&nbsp;&nbsp; (1,0) •</p>
+                        <p>(0,0) • &nbsp;&nbsp;&nbsp; (1,1) •</p>
+                        <p>No single straight line separates the classes.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 27: What Each Hidden Neuron Does -->
+            <div class="slide" id="slide27">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-microscope"></i> What Each Hidden Neuron Does</h1>
+                    <div class="slide-number">27</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Each hidden neuron learns one linear boundary.</h3>
+                    
+                    <p>With 2 hidden neurons, the network can:</p>
+                    <ul>
+                        <li>Split the space into multiple regions</li>
+                        <li>Combine them to form a non-linear decision boundary</li>
+                    </ul>
+                    
+                    <h3>In Logical Terms:</h3>
+                    
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Hidden Neuron</th>
+                                <th>Learns</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>h₁</td>
+                                <td>x₁ OR x₂</td>
+                            </tr>
+                            <tr>
+                                <td>h₂</td>
+                                <td>x₁ AND x₂</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <p>The output neuron then computes:</p>
+                    
+                    <div class="math-equation">
+                        \text{XOR} = (x_1 \text{ OR } x_2) - (x_1 \text{ AND } x_2)
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h4><i class="fas fa-exclamation-circle"></i> Important</h4>
+                        <p>This cannot be done with only 1 hidden neuron.</p>
+                    </div>
+                    
+                    <h3>What Happens If You Use Only 1 Hidden Neuron?</h3>
+                    <ul>
+                        <li><span class="incorrect">✗</span> It still behaves like a linear model</li>
+                        <li>One hidden neuron = one linear split</li>
+                        <li>XOR needs at least two splits</li>
+                    </ul>
+                    
+                    <p>So this fails:</p>
+                    <p><strong>Input → (1 neuron) → Output</strong></p>
+                </div>
+            </div>
+            
+            <!-- Slide 28: Minimal XOR Network -->
+            <div class="slide" id="slide28">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-network-wired"></i> Minimal XOR Network</h1>
+                    <div class="slide-number">28</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Correct Architecture for XOR</h3>
+                    
+                    <div class="visualization">
+                        <div class="visualization-header">
+                            <i class="fas fa-project-diagram"></i> Architecture Diagram
+                        </div>
+                        <p><strong>x₁</strong> → h₁ →</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↘ &nbsp;&nbsp;→ y</p>
+                        <p><strong>x₂</strong> → h₂ →</p>
+                        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↗</p>
+                    </div>
+                    
+                    <ul>
+                        <li><strong>Hidden layer:</strong> 2 neurons</li>
+                        <li><strong>Activation:</strong> ReLU / sigmoid / tanh</li>
+                        <li><strong>Output:</strong> sigmoid (for binary classification)</li>
+                    </ul>
+                    
+                    <div class="highlight">
+                        <h3>This is the simplest non-linear neural network.</h3>
+                    </div>
+                    
+                    <h3>Important: This does NOT mean "2 neurons is always enough"</h3>
+                    <p>This is where many students get confused.</p>
+                    
+                    <p>XOR is special because:</p>
+                    <ul>
+                        <li>Input dimension = 2</li>
+                        <li>Logical structure is simple</li>
+                        <li>Only one non-linear interaction</li>
+                    </ul>
+                    
+                    <div class="key-insight">
+                        <h4><i class="fas fa-lightbulb"></i> General Rule (Real Takeaway)</h4>
+                        <p><strong>The number of hidden neurons depends on the complexity of the function, not on a fixed rule.</strong></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 29: Problem Complexity Examples -->
+            <div class="slide" id="slide29">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-chart-bar"></i> Problem Complexity Examples</h1>
+                    <div class="slide-number">29</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Hidden Layer Design by Problem</h3>
+                    
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Problem</th>
+                                <th>Hidden Layer Design</th>
+                                <th>Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Linear regression</td>
+                                <td>No hidden layer</td>
+                                <td>Linear relationship</td>
+                            </tr>
+                            <tr>
+                                <td>XOR</td>
+                                <td>1 hidden layer, 2 neurons</td>
+                                <td>Simple non-linear logic</td>
+                            </tr>
+                            <tr>
+                                <td>Circle classification</td>
+                                <td>1 hidden layer, many neurons</td>
+                                <td>Curved boundary</td>
+                            </tr>
+                            <tr>
+                                <td>Image recognition</td>
+                                <td>Many layers, many neurons</td>
+                                <td>Hierarchical features</td>
+                            </tr>
+                            <tr>
+                                <td>Language modeling</td>
+                                <td>Deep networks</td>
+                                <td>Complex sequential patterns</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h3>Why Textbooks Often Use "2 Hidden Neurons"</h3>
+                    <p>Because XOR is:</p>
+                    <ul>
+                        <li>Small</li>
+                        <li>Visualizable</li>
+                        <li>Provably impossible for perceptrons</li>
+                        <li>Provably solvable with 2 hidden neurons</li>
+                    </ul>
+                    
+                    <div class="highlight">
+                        <h3>So it's the perfect teaching example, not a general prescription.</h3>
+                    </div>
+                    
+                    <h3>Exam-Quality Answer</h3>
+                    <p><strong>Yes, for the XOR problem, adding one hidden layer with two neurons is sufficient and minimal.</strong> The hidden neurons learn intermediate linear features, which are combined non-linearly at the output to solve a problem that is not linearly separable.</p>
+                </div>
+            </div>
+            
+            <!-- Slide 30: Teaching Insight -->
+            <div class="slide" id="slide30">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-chalkboard-teacher"></i> Final Teaching Insight</h1>
+                    <div class="slide-number">30</div>
+                </div>
+                <div class="slide-content">
+                    <div class="key-insight">
+                        <h4><i class="fas fa-lightbulb"></i> Powerful Teaching Analogy</h4>
+                        <p><strong>"Each hidden neuron adds one linear cut in the input space. XOR needs two cuts — therefore two hidden neurons."</strong></p>
+                        <p>This connects:</p>
+                        <ul>
+                            <li>Geometry</li>
+                            <li>Logic</li>
+                            <li>Network design</li>
+                        </ul>
+                    </div>
+                    
+                    <h3>Final Clear Statements</h3>
+                    
+                    <div class="visualization">
+                        <div class="visualization-header">
+                            <i class="fas fa-check-circle"></i> Key Takeaways
+                        </div>
+                        
+                        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                            <div style="background-color: #28a745; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px; font-weight: bold;">✓</div>
+                            <div>For XOR: one hidden layer with 2 neurons is correct</div>
+                        </div>
+                        
+                        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                            <div style="background-color: #28a745; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px; font-weight: bold;">✓</div>
+                            <div>For general problems: there is no fixed number</div>
+                        </div>
+                        
+                        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                            <div style="background-color: #28a745; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px; font-weight: bold;">✓</div>
+                            <div>Hidden layers are added only when linear models fail</div>
+                        </div>
+                        
+                        <div style="display: flex; align-items: center;">
+                            <div style="background-color: #28a745; color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px; font-weight: bold;">✓</div>
+                            <div>Neuron count reflects problem complexity</div>
+                        </div>
+                    </div>
+                    
+                    <h3>Complete Learning Journey</h3>
+                    <p>We've covered the entire journey from:</p>
+                    <ol>
+                        <li>Basic linear layer implementation</li>
+                        <li>Forward and backward passes with concrete numbers</li>
+                        <li>The role of activation functions</li>
+                        <li>Why hidden layers are necessary for non-linear problems</li>
+                        <li>How to determine the appropriate architecture for different problems</li>
+                    </ol>
+                    
+                    <div class="highlight">
+                        <h3>Remember:</h3>
+                        <p><strong>Neural networks are not magical black boxes.</strong> They're mathematical models whose behavior can be understood, analyzed, and predicted through careful study of their components and training dynamics.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 31: References & Further Reading -->
+            <div class="slide" id="slide31">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-book"></i> References & Further Reading</h1>
+                    <div class="slide-number">31</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Key Concepts Covered</h3>
+                    <ul>
+                        <li><strong>nn.Linear</strong>: PyTorch's linear layer implementation</li>
+                        <li><strong>Autograd</strong>: Automatic differentiation in PyTorch</li>
+                        <li><strong>Forward/Backward Pass</strong>: Computation and gradient flow</li>
+                        <li><strong>Hidden Layers</strong>: When and why they're needed</li>
+                        <li><strong>XOR Problem</strong>: Classic example of non-linear separability</li>
+                        <li><strong>Universal Approximation Theorem</strong>: Theoretical foundation</li>
+                    </ul>
+                    
+                    <h3>Recommended Resources</h3>
+                    
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Resource</th>
+                                <th>Focus</th>
+                                <th>Level</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>PyTorch Documentation</td>
+                                <td>Implementation details</td>
+                                <td>Intermediate</td>
+                            </tr>
+                            <tr>
+                                <td>"Deep Learning" by Goodfellow et al.</td>
+                                <td>Theoretical foundations</td>
+                                <td>Advanced</td>
+                            </tr>
+                            <tr>
+                                <td>Fast.ai Practical Deep Learning</td>
+                                <td>Applied techniques</td>
+                                <td>Beginner to Intermediate</td>
+                            </tr>
+                            <tr>
+                                <td>3Blue1Brown Neural Networks Series</td>
+                                <td>Visual intuition</td>
+                                <td>Beginner</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h3>Practice Exercises</h3>
+                    <ol>
+                        <li>Implement <code>nn.Linear(4, 2)</code> from scratch using only tensor operations</li>
+                        <li>Train a model to solve XOR with different architectures (1, 2, 3 hidden neurons)</li>
+                        <li>Visualize decision boundaries for linear vs. non-linear models</li>
+                        <li>Implement manual backpropagation for a small network</li>
+                        <li>Compare training dynamics with/without hidden layers on non-linear datasets</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <!-- Slide 32: Conclusion -->
+            <div class="slide" id="slide32">
+                <div class="slide-header">
+                    <h1 class="slide-title"><i class="fas fa-flag-checkered"></i> Conclusion</h1>
+                    <div class="slide-number">32</div>
+                </div>
+                <div class="slide-content">
+                    <h3>Summary of Key Insights</h3>
+                    
+                    <div class="visualization">
+                        <div class="visualization-header">
+                            <i class="fas fa-graduation-cap"></i> Core Principles
+                        </div>
+                        
+                        <div style="display: flex; margin-bottom: 15px;">
+                            <div style="min-width: 40px; color: var(--primary); font-weight: bold;">1.</div>
+                            <div><strong>nn.Linear</strong> implements y = Wx + b, a fundamental building block</div>
+                        </div>
+                        
+                        <div style="display: flex; margin-bottom: 15px;">
+                            <div style="min-width: 40px; color: var(--primary); font-weight: bold;">2.</div>
+                            <div><strong>Autograd</strong> automatically computes gradients via the chain rule</div>
+                        </div>
+                        
+                        <div style="display: flex; margin-bottom: 15px;">
+                            <div style="min-width: 40px; color: var(--primary); font-weight: bold;">3.</div>
+                            <div><strong>Hidden layers</strong> with activations enable learning non-linear patterns</div>
+                        </div>
+                        
+                        <div style="display: flex; margin-bottom: 15px;">
+                            <div style="min-width: 40px; color: var(--primary); font-weight: bold;">4.</div>
+                            <div>The <strong>XOR problem</strong> demonstrates the necessity of hidden layers</div>
+                        </div>
+                        
+                        <div style="display: flex;">
+                            <div style="min-width: 40px; color: var(--primary); font-weight: bold;">5.</div>
+                            <div>Network architecture should match <strong>problem complexity</strong></div>
+                        </div>
+                    </div>
+                    
+                    <h3>Looking Forward</h3>
+                    <p>This foundational understanding prepares you for:</p>
+                    
+                    <div class="highlight">
+                        <ul>
+                            <li><strong>Deep Learning Architectures</strong>: CNNs, RNNs, Transformers</li>
+                            <li><strong>Advanced Optimization</strong>: Adaptive learning rates, regularization</li>
+                            <li><strong>Modern Applications</strong>: Computer vision, NLP, reinforcement learning</li>
+                            <li><strong>Research Directions</strong>: Explainable AI, neural architecture search</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="key-insight">
+                        <h4><i class="fas fa-brain"></i> Final Thought</h4>
+                        <p>Understanding neural networks at this level — from the mathematical operations to the implementation details — transforms them from mysterious "black boxes" into transparent, analyzable models whose behavior you can predict, control, and improve.</p>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--light-gray);">
+                        <h3>Thank You!</h3>
+                        <p>This presentation covered the journey from <code>nn.Linear(4, 2)</code> to understanding when and why hidden layers are required in neural networks.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="slide-controls">
+                <button id="prevSlideBtn" class="btn">
+                    <i class="fas fa-arrow-left"></i> Previous Slide
+                </button>
+                <button id="nextSlideBtn" class="btn">
+                    Next Slide <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </main>
+    </div>
+    
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-logo">
+                <i class="fas fa-brain"></i>
+                <span>Neural Networks Deep Dive</span>
+            </div>
+            <div class="copyright">
+                Based on RL3_neurals.pdf content | Created for educational purposes
+            </div>
+            <div class="copyright">
+                Interactive Presentation | Use navigation buttons or sidebar to explore
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const slides = document.querySelectorAll('.slide');
+            const totalSlides = slides.length;
+            let currentSlide = 0;
+            
+            // Navigation elements
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const prevSlideBtn = document.getElementById('prevSlideBtn');
+            const nextSlideBtn = document.getElementById('nextSlideBtn');
+            const slideIndicator = document.getElementById('slideIndicator');
+            const sidebarNav = document.getElementById('sidebarNav');
+            
+            // Slide titles for sidebar navigation
+            const slideTitles = [
+                "Introduction: nn.Linear(4, 2)",
+                "Mathematical Representation",
+                "Parameter Creation & Initialization",
+                "Model Structure in Memory",
+                "Forward Pass & Autograd Graph",
+                "Backward Pass & Gradient Computation",
+                "Why nn.Linear is Elegant",
+                "Concrete Example: Setup",
+                "Concrete Example: Forward Pass",
+                "Loss Calculation",
+                "Backward Pass: Gradient Computation",
+                "Weight Gradient & Update",
+                "Key Teaching Insight",
+                "Is This a Perceptron?",
+                "Why No Hidden Layer",
+                "One Hidden Layer Case",
+                "Why Activation Is Mandatory",
+                "Geometric Interpretation",
+                "Model Type Summary",
+                "Networks Without Hidden Layers",
+                "Why Hidden Layers Change Everything",
+                "The XOR Example",
+                "Functional Perspective",
+                "Task Comparison",
+                "Decision Boundary Intuition",
+                "How Many Hidden Neurons?",
+                "What Each Hidden Neuron Does",
+                "Minimal XOR Network",
+                "Problem Complexity Examples",
+                "Final Teaching Insight",
+                "References & Further Reading",
+                "Conclusion"
+            ];
+            
+            // Section groupings for sidebar
+            const sectionTitles = [
+                {title: "Introduction to nn.Linear", start: 0},
+                {title: "Forward & Backward Pass", start: 4},
+                {title: "Concrete Example", start: 7},
+                {title: "Hidden Layers Explained", start: 13},
+                {title: "When Hidden Layers Are Needed", start: 19},
+                {title: "XOR Case Study", start: 26},
+                {title: "Conclusion", start: 30}
+            ];
+            
+            // Build sidebar navigation
+            function buildSidebarNav() {
+                let navHTML = '';
+                let currentSectionIndex = 0;
+                
+                for (let i = 0; i < totalSlides; i++) {
+                    // Check if we need to add a section title
+                    if (currentSectionIndex < sectionTitles.length && i === sectionTitles[currentSectionIndex].start) {
+                        navHTML += `<li class="section-title">${sectionTitles[currentSectionIndex].title}</li>`;
+                        currentSectionIndex++;
+                    }
+                    
+                    const isActive = i === 0 ? 'active' : '';
+                    navHTML += `
+                        <li>
+                            <a href="#" class="${isActive}" data-slide="${i}">
+                                <span style="font-weight: 600; margin-right: 5px;">${i + 1}.</span>
+                                ${slideTitles[i]}
+                            </a>
+                        </li>
+                    `;
+                }
+                
+                sidebarNav.innerHTML = navHTML;
+                
+                // Add click handlers to sidebar links
+                const navLinks = document.querySelectorAll('.sidebar-nav a');
+                navLinks.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const slideIndex = parseInt(this.getAttribute('data-slide'));
+                        goToSlide(slideIndex);
+                    });
+                });
+            }
+            
+            // Initialize sidebar
+            buildSidebarNav();
+            
+            // Update slide indicator
+            function updateSlideIndicator() {
+                slideIndicator.textContent = `Slide ${currentSlide + 1} of ${totalSlides}`;
+                
+                // Update active state in sidebar
+                const navLinks = document.querySelectorAll('.sidebar-nav a');
+                navLinks.forEach((link, index) => {
+                    if (index === currentSlide) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+            
+            // Show specific slide
+            function showSlide(index) {
+                // Hide all slides
+                slides.forEach(slide => {
+                    slide.classList.remove('active');
+                });
+                
+                // Show the selected slide
+                slides[index].classList.add('active');
+                
+                // Update current slide
+                currentSlide = index;
+                
+                // Update slide indicator
+                updateSlideIndicator();
+                
+                // Scroll to top of slides container
+                document.querySelector('.slides-container').scrollTop = 0;
+            }
+            
+            // Go to specific slide
+            function goToSlide(index) {
+                if (index >= 0 && index < totalSlides) {
+                    showSlide(index);
+                }
+            }
+            
+            // Next slide
+            function nextSlide() {
+                if (currentSlide < totalSlides - 1) {
+                    goToSlide(currentSlide + 1);
+                }
+            }
+            
+            // Previous slide
+            function prevSlide() {
+                if (currentSlide > 0) {
+                    goToSlide(currentSlide - 1);
+                }
+            }
+            
+            // Event listeners
+            prevBtn.addEventListener('click', prevSlide);
+            nextBtn.addEventListener('click', nextSlide);
+            prevSlideBtn.addEventListener('click', prevSlide);
+            nextSlideBtn.addEventListener('click', nextSlide);
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowRight' || e.key === ' ') {
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft') {
+                    prevSlide();
+                } else if (e.key === 'Home') {
+                    goToSlide(0);
+                } else if (e.key === 'End') {
+                    goToSlide(totalSlides - 1);
+                }
+            });
+            
+            // Initialize
+            updateSlideIndicator();
+            
+            // Add visual effects to code blocks
+            function highlightCodeBlocks() {
+                const codeBlocks = document.querySelectorAll('.code-block');
+                codeBlocks.forEach(block => {
+                    // Simple syntax highlighting simulation
+                    const html = block.innerHTML;
+                    // This is a simplified version - in a real implementation,
+                    // you would use a proper syntax highlighter library
+                    block.innerHTML = html
+                        .replace(/\b(def|class|return|if|else|for|while|in)\b/g, '<span class="code-keyword">$1</span>')
+                        .replace(/\b(nn\.Linear|nn\.Sequential|nn\.ReLU|nn\.init|torch|F\.linear)\b/g, '<span class="code-function">$1</span>')
+                        .replace(/\b(self|weight|bias|input|model|x|y)\b/g, '<span class="code-var">$1</span>')
+                        .replace(/\b(\d+)\b/g, '<span class="code-number">$1</span>')
+                        .replace(/\(# .*?\)/g, '<span class="code-comment">$&</span>');
+                });
+            }
+            
+            // Initialize code highlighting
+            highlightCodeBlocks();
+            
+            // Add animation to key insights on slide entry
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animated');
+                    }
+                });
+            }, observerOptions);
+            
+            // Observe key insights for animation
+            document.querySelectorAll('.key-insight, .highlight').forEach(el => {
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>
